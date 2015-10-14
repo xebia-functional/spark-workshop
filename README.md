@@ -1,6 +1,6 @@
-# Spark Workshop at Lambda World
+# Spark Workshop
 
-This repository will be used at [Lambda World 2015](http://www.lambda.world/) on October 23th, 2015, celebrated in Cádiz, as part of one the Workshops of Introduction to [Apache Spark](http://spark.apache.org/).
+This repository was delivered at [Lambda World 2015](http://www.lambda.world/) on October 23th, 2015, celebrated in Cádiz, as part of one the Workshops of Introduction to [Apache Spark](http://spark.apache.org/).
 
 ## Overview
 
