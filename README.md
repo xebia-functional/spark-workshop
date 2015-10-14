@@ -4,7 +4,7 @@ This repository will be used at [Lambda World 2015](http://www.lambda.world/) on
 
 ## Overview
 
->Apache Spark is a fast and general-purpose cluster computing system. It provides high-level APIs in Java, Scala, Python and R, and an optimized engine that supports general execution >graphs. It also supports a rich set of higher-level tools including Spark SQL for SQL and structured data processing, MLlib for machine learning, GraphX for graph processing, and Spark >Streaming.
+>Apache Spark is a fast and general-purpose cluster computing system. It provides high-level APIs in Java, Scala, Python and R, and an optimized engine that supports general execution graphs. It also supports a rich set of higher-level tools including Spark SQL for SQL and structured data processing, MLlib for machine learning, GraphX for graph processing, and Spark Streaming.
 
 [Apache Spark](http://spark.apache.org/)
 
@@ -42,7 +42,7 @@ Those are used just for sample demo purposes.
 
 Notes:
 
-1. The appearance of an opinion word in a sentence does not necessarily  
+1. The appearance of an opinion word in a sentence does not necessarily
   mean that the sentence expresses a positive or negative opinion.
   See the paper below:
 
