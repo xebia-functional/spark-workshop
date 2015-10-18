@@ -46,10 +46,10 @@ Cache:
 
 This section was run from the System shell:
 
-    cd sampleapp && sbt package
+    cd sampleapp && ../sbt/bin/sbt package
 
     $SPARK_HOME/bin/spark-submit \
-    --master spark://macjp.local:7077 \
+    --master spark://127.0.0.1:7077 \
     --total-executor-cores 4 \
     target/scala-2.11/sample-app_2.11-1.0.jar "../data/README.md" \
     --class "SampleApp"
