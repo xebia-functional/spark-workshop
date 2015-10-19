@@ -45,7 +45,7 @@ Some experience in Scala. Some familiarity with big data or parallel processing 
     `sh scripts/sparkws.sh`
 * That's all, if everything was fine you should be able to see the local Spark Standalone Deployment into your browser: http://localhost:8080 .
 
-![" "](http://jpedrom.es/1PuYcKF "Spark Standalone Deployment")
+![" "](./dist/standalone.png "Spark Standalone Deployment")
 
 ## About Tweets Sentimental Analysis
 
