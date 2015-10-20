@@ -43,7 +43,7 @@ Some experience in Scala. Some familiarity with big data or parallel processing 
 * File [/data/spark-env.sh](./dist/spark-env.sh) must be copied to `$SPARK_HOME/conf/spark-env.sh`.
 * Let's run the Spark Cluster and the Spark Shell, altogether into a single step:
     `sh scripts/sparkws.sh`
-* That's all, if everything was fine you should be able to see the local Spark Standalone Deployment into your browser: http://localhost:8080 .
+* That's all, if everything was fine you should be able to see the local Spark Standalone Deployment into your browser: [http://localhost:8080](http://localhost:8080) .
 
 ![" "](./dist/standalone.png "Spark Standalone Deployment")
 
