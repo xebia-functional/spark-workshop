@@ -1,12 +1,31 @@
 # Summary
 
-This document contains all the sample commands used in the Labs sessions along the Workshop. All of them were launched against Spark Shell Session, learning about which effects has in the [Spark Standalone Cluster](http://spark.apache.org/docs/latest/spark-standalone.html).
+This document contains all the sample commands used in the Labs sessions along the Workshop. All of them were launched against Spark Shell Session,
+learning about which effects has in the [Spark Standalone Cluster](http://spark.apache.org/docs/latest/spark-standalone.html).
+
+We are going to go through 2 different sort of Spark operations:
+  a) Transformations. This kind of operations are lazy, which means that they are not going to
+  run anything in any node until an action is callied. They don`t return a value, but a pointer to
+  a new RDD.
+  We are going to tag them with a [T] at the beginning of the description to make it as clear as
+  possible.
+
+  b) Actions. They apply an operation to a RDD and returns a value. When an action is called, all
+  the acumulated transformations are applied and the action is run over the last produced one.
+  We are going to tag them with a [A] at the begining of the description to make it as clear as
+  possible.
 
 ## Part 1: Basics
 
-    val textFile = sc.textFile("data/README.md")
+    * [T] Loads the content from a file and creates a RDD
+      ```
+      val textFile = sc.textFile("data/README.md")
+      ```
 
-    textFile.count()
+    * [A] Applies count action to textFile RDD
+      ```
+      textFile.count()
+      ```
 
     val linesWithSpark = textFile.filter(line => line.contains("Spark"))
 
@@ -32,7 +51,7 @@ Map-Reduce:
 
 Map-Reduce, the same but simpler:
 
-    val wordCounts2 = textFile.flatMap(_.split(" ")).map((_, 1)).reduceByKey(_ + _)
+    val words = textFile.flatMap(_.split(" ")).map((_, 1)).reduceByKey(_ + _)
 
 Map-Reduce Action:
 
@@ -46,11 +65,11 @@ Cache:
 
 This section was run from the System shell:
 
-    cd sampleapp && ../sbt/bin/sbt package
+    cd sampleapp && sbt package
 
+    cd .. &&\ 
     $SPARK_HOME/bin/spark-submit \
-    --master spark://127.0.0.1:7077 \
-    --total-executor-cores 4 \
+    --master spark://localhost:7077 \
     target/scala-2.11/sample-app_2.11-1.0.jar "../data/README.md" \
     --class "SampleApp"
 
@@ -59,12 +78,12 @@ This section was run from the System shell:
 
     import sqlContext.implicits._
 
-    val tweets = sqlContext.jsonFile("data/100tweets.json")
+  val tweets = sqlContext.jsonFile("data/100tweets.json")
     val positiveWordsFile = sc.textFile("data/positive-words.txt")
     val negativeWordsFile = sc.textFile("data/negative-words.txt")
 
-    val positiveWords = positiveWordsFile.filter(w => !w.startsWith(";")).filter(!_.isEmpty)
-    val negativeWords = negativeWordsFile.filter(w => !w.startsWith(";")).filter(!_.isEmpty)
+    val positiveWords = positiveWordsFile.filter(w => !w.startsWith(";"))
+    val negativeWords = negativeWordsFile.filter(w => !w.startsWith(";"))
 
     val pw = positiveWords.collect.toSet
     val nw = negativeWords.collect.toSet
@@ -89,13 +108,18 @@ Working with DataFrames:
 
     val wordsArray = onlyText map (ot => (ot, ot.split(" ").toSet))
 
-    val positiveTweets = wordsArray flatMap { case (original, set) => set intersect pw filter (!_.isEmpty) map (_ => original) } filter (!_.isEmpty)
-    val negativeTweets = wordsArray flatMap { case (original, set) => set intersect nw filter (!_.isEmpty) map (_ => original) } filter (!_.isEmpty)
+    val positiveTweets = wordsArray map { case (original, set) => set intersect pw filter (!_.isEmpty) map (_ => original) } filter (!_.isEmpty)
+    val negativeTweets = wordsArray map { case (original, set) => set intersect nw filter (!_.isEmpty) map (_ => original) } filter (!_.isEmpty)
 
 Persistence:
 
-    positiveWords.persist(org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK)
-    positiveWords.collect
-
-    negativeWords.persist(org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK_SER)
+    negativeWords.persist(org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK)
     negativeWords.collect
+
+#License
+
+Copyright (C) 2015 47 Degrees, LLC [http://47deg.com](http://47deg.com) [hello@47deg.com](mailto:hello@47deg.com)
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
