@@ -4,6 +4,7 @@ This document contains all the sample commands used in the Labs sessions along t
 learning about which effects has in the [Spark Standalone Cluster](http://spark.apache.org/docs/latest/spark-standalone.html).
 
 We are going to go through 2 different sort of Spark operations:
+
   a) Transformations. This kind of operations are lazy, which means that they are not going to
   run anything in any node until an action is callied. They don`t return a value, but a pointer to
   a new RDD.
@@ -17,16 +18,14 @@ We are going to go through 2 different sort of Spark operations:
 
 ## Part 1: Basics
 
-    * [T] Loads the content from a file and creates a RDD
-      ```
-      val textFile = sc.textFile("data/README.md")
-      ```
+* [T] Loads the content from a file and creates a RDD
 
-    * [A] Applies count action to textFile RDD
-      ```
-      textFile.count()
-      ```
+    val textFile = sc.textFile("data/README.md")
+ 
+* [A] Applies count action to textFile RDD
 
+    textFile.count()
+    
     val linesWithSpark = textFile.filter(line => line.contains("Spark"))
 
     val lineLenghts = textFile.map(line => line.split(" ").size)
