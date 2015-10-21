@@ -69,11 +69,11 @@ In addition, we can follow our process execution, failures, times and some other
 
 This section was run from the System shell:
 
-    cd sampleapp && sbt package
+    cd sampleapp && ../sbt/bin/sbt package
 
-    cd .. &&\ 
     $SPARK_HOME/bin/spark-submit \
-    --master spark://localhost:7077 \
+    --master spark://127.0.0.1:7077 \
+    --total-executor-cores 4 \
     target/scala-2.11/sample-app_2.11-1.0.jar "../data/README.md" \
     --class "SampleApp"
 
@@ -82,12 +82,12 @@ This section was run from the System shell:
 
     import sqlContext.implicits._
 
-  val tweets = sqlContext.jsonFile("data/100tweets.json")
+    val tweets = sqlContext.jsonFile("data/100tweets.json")
     val positiveWordsFile = sc.textFile("data/positive-words.txt")
     val negativeWordsFile = sc.textFile("data/negative-words.txt")
 
-    val positiveWords = positiveWordsFile.filter(w => !w.startsWith(";"))
-    val negativeWords = negativeWordsFile.filter(w => !w.startsWith(";"))
+    val positiveWords = positiveWordsFile.filter(w => !w.startsWith(";")).filter(!_.isEmpty)
+    val negativeWords = negativeWordsFile.filter(w => !w.startsWith(";")).filter(!_.isEmpty)
 
     val pw = positiveWords.collect.toSet
     val nw = negativeWords.collect.toSet
@@ -112,18 +112,13 @@ Working with DataFrames:
 
     val wordsArray = onlyText map (ot => (ot, ot.split(" ").toSet))
 
-    val positiveTweets = wordsArray map { case (original, set) => set intersect pw filter (!_.isEmpty) map (_ => original) } filter (!_.isEmpty)
-    val negativeTweets = wordsArray map { case (original, set) => set intersect nw filter (!_.isEmpty) map (_ => original) } filter (!_.isEmpty)
+    val positiveTweets = wordsArray flatMap { case (original, set) => set intersect pw filter (!_.isEmpty) map (_ => original) } filter (!_.isEmpty)
+    val negativeTweets = wordsArray flatMap { case (original, set) => set intersect nw filter (!_.isEmpty) map (_ => original) } filter (!_.isEmpty)
 
 Persistence:
 
-    negativeWords.persist(org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK)
+    positiveWords.persist(org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK)
+    positiveWords.collect
+
+    negativeWords.persist(org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK_SER)
     negativeWords.collect
-
-#License
-
-Copyright (C) 2015 47 Degrees, LLC [http://47deg.com](http://47deg.com) [hello@47deg.com](mailto:hello@47deg.com)
-
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
