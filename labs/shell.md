@@ -5,60 +5,65 @@ learning about which effects has in the [Spark Standalone Cluster](http://spark.
 
 We are going to go through 2 different sort of Spark operations:
 
-  a) Transformations. This kind of operations are lazy, which means that they are not going to
-  run anything in any node until an action is callied. They don`t return a value, but a pointer to
-  a new RDD.
-  We are going to tag them with a [T] at the beginning of the description to make it as clear as
-  possible.
+* **Transformations**. This kind of operations are lazy, which means that they are not going to
+run anything in any node until an action is called. They don`t return a value, but a pointer to
+a new RDD.
+We are going to tag them with a [T] at the beginning of the description to make it as clear as
+possible.
 
-  b) Actions. They apply an operation to a RDD and returns a value. When an action is called, all
-  the acumulated transformations are applied and the action is run over the last produced one.
-  We are going to tag them with a [A] at the begining of the description to make it as clear as
+* **Actions**. They apply an operation to a RDD and returns a value. When an action is called, all
+  the accumulated transformations are applied and the action is run over the last produced one.
+  We are going to tag them with a [A] at the beginning of the description to make it as clear as
   possible.
+  
+In addition, we can follow our process execution, failures, times and some other metrics on the Spark Standalone Cluster Web UI (aka ClusterUI) that is running on localhost:8080 (if you are running our sample scripts)
 
 ## Part 1: Basics
 
-* [T] Loads the content from a file and creates a RDD
+* [T] Creates a RDD that will contain an Array[String] with the file lines text.
 
-    val textFile = sc.textFile("data/README.md")
+		val textFile = sc.textFile("data/README.md")
  
-* [A] Applies count action to textFile RDD
+* [A] Applies count action to textFile RDD and returns the value.
 
-    textFile.count()
+		textFile.count()
+		
+* [T] Creates a new RDD with lines that contains the word `Spark`.
     
-    val linesWithSpark = textFile.filter(line => line.contains("Spark"))
+		val linesWithSpark = textFile.filter(line => line.contains("Spark"))
+		
+* [T] Creates a new RDD containing the amount of words of each line.
 
-    val lineLenghts = textFile.map(line => line.split(" ").size)
+		val lineLenghts = textFile.map(line => line.split(" ").size)
 
-RDD Action, option 1:
+* [A] Compares each lineLength and returns the highest value.
 
-    lineLenghts.reduce((a, b) => if (a > b) a else b)
+		lineLenghts.reduce((a, b) => if (a > b) a else b)
 
-RDD Action, option 2:
+* [A] Makes the same action as before but using the Math java library.
 
-    import java.lang.Math
+		import java.lang.Math
+		lineLenghts.reduce((a, b) => Math.max(a,b))
 
-    lineLenghts.reduce((a, b) => Math.max(a,b))
+* [A] It performs an invalid operation that produces a runtime failure. We can see this sort of errors in the ClusterUI.
 
-Failed Job:
+		lineLenghts.reduce((a,b) => a+b/0)
 
-    lineLenghts.reduce((a,b) => a+b/0)
+* [T] **Map-Reduce**. It will describe a new RDD that will contain the wordCount of each README line.
 
-Map-Reduce:
+		val wordCounts = textFile.flatMap(line => line.split(" ")).map(word => (word, 1)).reduceByKey((a, b) => a + b)
 
-    val wordCounts = textFile.flatMap(line => line.split(" ")).map(word => (word, 1)).reduceByKey((a, b) => a + b)
+* [T] It performs the same transformation than the previous one but in a simpler way.
 
-Map-Reduce, the same but simpler:
+		val words = textFile.flatMap(_.split(" ")).map((_, 1)).reduceByKey(_ + _)
 
-    val words = textFile.flatMap(_.split(" ")).map((_, 1)).reduceByKey(_ + _)
+* [A] We are going to collect the containing values on the wordCounts RDD. We'll see an Array[Int] with all the line wordCounts values.
 
-Map-Reduce Action:
+		wordCounts.collect
 
-    wordCounts.collect
+* Cache:
 
-Cache:
-
-    linesWithSpark.cache()
+		linesWithSpark.cache()
 
 ## Part 2: Self Contained Application
 
