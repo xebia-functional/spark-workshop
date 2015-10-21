@@ -50,6 +50,10 @@ In addition, we can follow our process execution, failures, times and some other
         val lazyFail = lineLenghts.map(len => len + 3 / 0)
 		lazyFail.collect()
 
+* [A] It saves the `lineLengths` RDD as a text file, using string representations of elements.
+
+        lineLenghts.saveAsTextFile("tmp/lineLengths")
+
 * [T] **Map-Reduce**. It will describe a new RDD that will contain the wordCount of each README line.
 
 		val wordCounts = textFile.flatMap(line => line.split(" ")).map(word => (word, 1)).reduceByKey((a, b) => a + b)
