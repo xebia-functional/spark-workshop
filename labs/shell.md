@@ -15,7 +15,7 @@ possible.
   the accumulated transformations are applied and the action is run over the last produced one.
   We are going to tag them with a [A] at the beginning of the description to make it as clear as
   possible.
-  
+
 In addition, we can follow our process execution, failures, times and some other metrics on the Spark Standalone Cluster Web UI (aka ClusterUI) that is running on localhost:8080 (if you are running our sample scripts)
 
 ## Part 1: Basics
@@ -23,15 +23,15 @@ In addition, we can follow our process execution, failures, times and some other
 * [T] Creates a RDD that will contain an Array[String] with the file lines text.
 
 		val textFile = sc.textFile("data/README.md")
- 
+
 * [A] Applies count action to textFile RDD and returns the value.
 
 		textFile.count()
-		
+
 * [T] Creates a new RDD with lines that contains the word `Spark`.
-    
+
 		val linesWithSpark = textFile.filter(line => line.contains("Spark"))
-		
+
 * [T] Creates a new RDD containing the amount of words of each line.
 
 		val lineLenghts = textFile.map(line => line.split(" ").size)
@@ -47,7 +47,8 @@ In addition, we can follow our process execution, failures, times and some other
 
 * [A] It performs an invalid operation that produces a runtime failure. We can see this sort of errors in the ClusterUI.
 
-		lineLenghts.reduce((a,b) => a+b/0)
+        val lazyFail = lineLenghts.map(len => len + 3 / 0)
+		lazyFail.collect()
 
 * [T] **Map-Reduce**. It will describe a new RDD that will contain the wordCount of each README line.
 
