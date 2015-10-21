@@ -6,7 +6,7 @@ learning about which effects has in the [Spark Standalone Cluster](http://spark.
 We are going to go through 2 different sort of Spark operations:
 
 * **Transformations**. This kind of operations are lazy, which means that they are not going to
-run anything in any node until an action is called. They don`t return a value, but a pointer to
+run anything in any node until an action is called. They don't return a value, but a pointer to
 a new RDD.
 We are going to tag them with a [T] at the beginning of the description to make it as clear as
 possible.
