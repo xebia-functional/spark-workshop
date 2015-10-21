@@ -1,6 +1,5 @@
 metastore_db
 derby.log
-logs
 target
 tmp
 .idea/
