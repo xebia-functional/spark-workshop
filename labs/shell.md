@@ -45,7 +45,7 @@ In addition, we can follow our process execution, failures, times and some other
 		import java.lang.Math
 		lineLenghts.reduce((a, b) => Math.max(a,b))
 
-* [A] It performs an invalid operation that produces a runtime failure. We can see this sort of errors in the ClusterUI.
+* [A] It performs an invalid operation that produces a runtime failure. The exception is initially wrapped into a lazy transformation operation. We only will see the issue running an action (collect in the example). We can see this sort of errors in the ClusterUI.
 
         val lazyFail = lineLenghts.map(len => len + 3 / 0)
 		lazyFail.collect()
@@ -66,7 +66,7 @@ In addition, we can follow our process execution, failures, times and some other
 
 		wordCounts.collect
 
-* Cache method, it persists the RDD with the default storage level (`MEMORY_ONLY`):
+* `Cache` method, it persists the RDD with the default storage level (`MEMORY_ONLY`):
 
 		val cachedRDD = wordCounts.cache()
         cachedRDD.collect()
