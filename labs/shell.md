@@ -66,9 +66,16 @@ In addition, we can follow our process execution, failures, times and some other
 
 		wordCounts.collect
 
-* Cache:
+* Cache method, it persists the RDD with the default storage level (`MEMORY_ONLY`):
 
-		linesWithSpark.cache()
+		val cachedRDD = wordCounts.cache()
+        cachedRDD.collect()
+
+	Once the wordCounts RDD is cached, it won't be re-computed (have a look to the ClusterUI to see more details).
+
+* Utility to show more information about one RDD from the Spark Shell:
+
+        cachedRDD.toDebugString
 
 ## Part 2: Self Contained Application
 
