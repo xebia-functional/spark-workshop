@@ -3,6 +3,8 @@
 This document contains all the sample commands used in the Labs sessions along the Workshop. All of them were launched against Spark Shell Session,
 learning about which effects has in the [Spark Standalone Cluster](http://spark.apache.org/docs/latest/spark-standalone.html).
 
+## Part 1: Basics
+
 We are going to go through 2 different sort of Spark operations:
 
 * **Transformations**. This kind of operations are lazy, which means that they are not going to
@@ -18,7 +20,7 @@ possible.
 
 In addition, we can follow our process execution, failures, times and some other metrics on the Spark Standalone Cluster Web UI (aka ClusterUI) that is running on localhost:8080 (if you are running our sample scripts)
 
-## Part 1: Basics
+*Exercises*
 
 * [T] Creates a RDD that will contain an Array[String] with the file lines text.
 
@@ -79,58 +81,77 @@ In addition, we can follow our process execution, failures, times and some other
 
 ## Part 2: Self Contained Application
 
-This section was run from the System shell:
+In this section we are going to deploy an app to a Spark cluster.
 
-    cd sampleapp && ../sbt/bin/sbt package
+*Exercises*
 
-    $SPARK_HOME/bin/spark-submit \
-    --master spark://127.0.0.1:7077 \
-    --total-executor-cores 4 \
-    target/scala-2.11/sample-app_2.11-1.0.jar "../data/README.md" \
-    --class "SampleApp"
+* Navigate to the sampleApp folder and create the dist package.
+		
+		cd sampleapp && ../sbt/bin/sbt package
+
+* Submits the dist package to the master spark node, defining 4 nodes and specifying the main class name of your app.
+
+		$SPARK_HOME/bin/spark-submit \ 
+		--master spark://127.0.0.1:7077 \
+		--total-executor-cores 4 \
+		target/scala-2.11/sample-app_2.11-1.0.jar "../data/README.md" \
+		--class "SampleApp"
 
 
 ## Part 3: SQL and DataFrames
 
-    import sqlContext.implicits._
+This section will guide you through some SparkSQL examples. All the resources files are a folder included in this repo called `data`.
 
-    val tweets = sqlContext.jsonFile("data/100tweets.json")
-    val positiveWordsFile = sc.textFile("data/positive-words.txt")
-    val negativeWordsFile = sc.textFile("data/negative-words.txt")
+*Exercises*
 
-    val positiveWords = positiveWordsFile.filter(w => !w.startsWith(";")).filter(!_.isEmpty)
-    val negativeWords = negativeWordsFile.filter(w => !w.startsWith(";")).filter(!_.isEmpty)
+* We are going to load 3 different files, one that contains 100 different tweets, one that contains positive words, and another one that contains negative words. 
 
-    val pw = positiveWords.collect.toSet
-    val nw = negativeWords.collect.toSet
+		import sqlContext.implicits._
 
-    tweets.printSchema
+		val tweets = sqlContext.jsonFile("data/100tweets.json")
+		val positiveWordsFile = sc.textFile("data/positive-words.txt")
+		val negativeWordsFile = sc.textFile("data/negative-words.txt")
 
-Running SQL queries:
+* Then, we are filtering positive and negative words files to get only those of them that aren't comments and are not empty.    
 
-    tweets.registerTempTable("tweets")
+		val positiveWords = positiveWordsFile.filter(w => !w.startsWith(";")).filter(!_.isEmpty)
+		val negativeWords = negativeWordsFile.filter(w => !w.startsWith(";")).filter(!_.isEmpty)
 
-    sqlContext.sql("SELECT text, retweet_count FROM tweets where retweet_count > 0")
+		val pw = positiveWords.collect.toSet
+		val nw = negativeWords.collect.toSet
 
-Working with DataFrames:
+* It prints the schema that is auto inferred from the json file content.
 
-    case class Tweet(text: String, retweet_count: Long, favorited: Boolean)
+		tweets.printSchema
 
-    val tweetsInfo = tweets.select("text", "retweet_count","favorited") map (t => Tweet(t.getAs[String]("text"), t.getAs[Long]("retweet_count"), t.getAs[Boolean]("favorited")))
+* Running SQL queries:
 
-    val tweetsInfoDF = tweetsInfo.toDF
+		tweets.registerTempTable("tweets")
 
-    val onlyText = tweetsInfo map (_.text)
+		sqlContext.sql("SELECT text, retweet_count FROM tweets where retweet_count > 0")
 
-    val wordsArray = onlyText map (ot => (ot, ot.split(" ").toSet))
+* Working with DataFrames. We are defining a case class and use to create new objects. We are making the tweets content to fit in that case class.
 
-    val positiveTweets = wordsArray flatMap { case (original, set) => set intersect pw filter (!_.isEmpty) map (_ => original) } filter (!_.isEmpty)
-    val negativeTweets = wordsArray flatMap { case (original, set) => set intersect nw filter (!_.isEmpty) map (_ => original) } filter (!_.isEmpty)
+		case class Tweet(text: String, retweet_count: Long, favorited: Boolean)
 
-Persistence:
+		val tweetsInfo = tweets.select("text", "retweet_count","favorited") map (t => Tweet(t.getAs[String]("text"), t.getAs[Long]("retweet_count"), t.getAs[Boolean]("favorited")))
 
-    positiveWords.persist(org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK)
-    positiveWords.collect
+* Creates a DataFrame from the RDD.
 
-    negativeWords.persist(org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK_SER)
-    negativeWords.collect
+		val tweetsInfoDF = tweetsInfo.toDF
+
+* Defines a RDD that contains only the tweet text, transform it to get a new one with all the words and then, use it to get positive and negative tweets.
+
+		val onlyText = tweetsInfo map (_.text)
+
+		val wordsArray = onlyText map (ot => (ot, ot.split(" ").toSet))
+
+		val positiveTweets = wordsArray flatMap { case (original, set) => set intersect pw filter (!_.isEmpty) map (_ => original) } filter (!_.isEmpty)
+		val negativeTweets = wordsArray flatMap { case (original, set) => set intersect nw filter (!_.isEmpty) map (_ => original) } filter (!_.isEmpty)
+
+* **Persistence**. We are going to save our positive and negative tweets in 2 different ways. Positive will be stored in both, memory and disk, as plain text. Negative ones will be persisted in both too, memory and disk, but the content will be serialised.
+
+		positiveWords.persist(org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK)
+		positiveWords.collect
+    		negativeWords.persist(org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK_SER)
+		negativeWords.collect
