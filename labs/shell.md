@@ -47,8 +47,8 @@ In addition, we can follow our process execution, failures, times and some other
 
 * [A] It performs an invalid operation that produces a runtime failure. The exception is initially wrapped into a lazy transformation operation. We only will see the issue running an action (collect in the example). We can see this sort of errors in the ClusterUI.
 
-        val lazyFail = lineLenghts.map(len => len + 3 / 0)
-		lazyFail.collect()
+        val lazyFailure = lineLenghts.map(len => len + 3 / 0)
+		lazyFailure.collect()
 
 * [A] It saves the `lineLengths` RDD as a text file, using string representations of elements.
 
