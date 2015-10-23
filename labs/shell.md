@@ -89,7 +89,7 @@ In this section we are going to deploy an app to a Spark cluster.
 		
 		cd sampleapp && ../sbt/bin/sbt package
 
-* Submits the dist package to the master spark node, defining 4 nodes and specifying the main class name of your app.
+* Submits the dist package to the master spark node, requesting 4 CPU cores along all the available executors and specifying the main class name of your app.
 
 		$SPARK_HOME/bin/spark-submit \ 
 		--master spark://127.0.0.1:7077 \
