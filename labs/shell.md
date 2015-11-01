@@ -112,13 +112,13 @@ This section will guide you through some SparkSQL examples. All the resources fi
 		val positiveWordsFile = sc.textFile("data/positive-words.txt")
 		val negativeWordsFile = sc.textFile("data/negative-words.txt")
 
-* Then, we are filtering positive and negative words files to get only those of them that aren't comments and are not empty.    
+* Then, we are filtering positive and negative words files to get only those of them that aren't comments and are not empty.
 
 		val positiveWords = positiveWordsFile.filter(w => !w.startsWith(";")).filter(!_.isEmpty)
 		val negativeWords = negativeWordsFile.filter(w => !w.startsWith(";")).filter(!_.isEmpty)
 
-		val pw = positiveWords.collect.toSet
-		val nw = negativeWords.collect.toSet
+		val pw = positiveWords.collect().toSet
+		val nw = negativeWords.collect().toSet
 
 * It prints the schema that is auto inferred from the json file content.
 
