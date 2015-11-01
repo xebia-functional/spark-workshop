@@ -68,7 +68,7 @@ In addition, we can follow our process execution, failures, times and some other
 
 		wordCounts.collect
 
-* `Cache` method, it persists the RDD with the default storage level (`MEMORY_ONLY`):
+* `cache` method, it persists the RDD with the default storage level (`MEMORY_ONLY`):
 
 		val cachedRDD = wordCounts.cache()
         cachedRDD.collect()
@@ -86,12 +86,12 @@ In this section we are going to deploy an app to a Spark cluster.
 *Exercises*
 
 * Navigate to the sampleApp folder and create the dist package.
-		
+
 		cd sampleapp && ../sbt/bin/sbt package
 
 * Submits the dist package to the master spark node, requesting 4 CPU cores along all the available executors and specifying the main class name of your app.
 
-		$SPARK_HOME/bin/spark-submit \ 
+		$SPARK_HOME/bin/spark-submit \
 		--master spark://127.0.0.1:7077 \
 		--total-executor-cores 4 \
 		target/scala-2.11/sample-app_2.11-1.0.jar "../data/README.md" \
@@ -104,7 +104,7 @@ This section will guide you through some SparkSQL examples. All the resources fi
 
 *Exercises*
 
-* We are going to load 3 different files, one that contains 100 different tweets, one that contains positive words, and another one that contains negative words. 
+* We are going to load 3 different files, one that contains 100 different tweets, one that contains positive words, and another one that contains negative words.
 
 		import sqlContext.implicits._
 
