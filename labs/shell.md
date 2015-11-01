@@ -142,16 +142,36 @@ This section will guide you through some SparkSQL examples. All the resources fi
 
 * Defines a RDD that contains only the tweet text, transform it to get a new one with all the words and then, use it to get positive and negative tweets.
 
-		val onlyText = tweetsInfo map (_.text)
+    val onlyText = tweetsInfo map (_.text)
 
-		val wordsArray = onlyText map (ot => (ot, ot.split(" ").toSet))
+* Writing down _:paste_ over the shell, thus we could paste code a *lookup* helper function:
 
-		val positiveTweets = wordsArray flatMap { case (original, set) => set intersect pw filter (!_.isEmpty) map (_ => original) } filter (!_.isEmpty)
-		val negativeTweets = wordsArray flatMap { case (original, set) => set intersect nw filter (!_.isEmpty) map (_ => original) } filter (!_.isEmpty)
+		def lookup(tweetText: String, referenceWords: Set[String]) =
+			tweetText
+				.split(" ")
+				.toSet
+				.intersect(referenceWords)
+				.exists(!_.isEmpty) match {
+				case true => tweetText
+				case _ => ""
+			}
+
+* Let's define a couple of **broadcast variables**, useful when we want to have read-only variables cached on each machine rather than shipping a copy of it with tasks. More info at [Broadcast Variables](http://spark.apache.org/docs/latest/programming-guide.html#broadcast-variables):
+
+		val bcvPositiveWords = sc.broadcast(pw)
+    val bcvNegativeWords = sc.broadcast(nw)
+
+* Finally, positive and negative tweets could be computed as follows:
+
+		val bcValuePositives = bcvPositiveWords.value
+		val bcValueNegatives = bcvNegativeWords.value
+		val positiveTweets = onlyText map (lookup(_, bcValuePositives)) filter (!_.isEmpty)
+		val bcValueNegatives = bcvNegativeWords.value
+		val negativeTweets = onlyText map (lookup(_, bcValueNegatives)) filter (!_.isEmpty)
 
 * **Persistence**. We are going to save our positive and negative tweets in 2 different ways. Positive will be stored in both, memory and disk, as plain text. Negative ones will be persisted in both too, memory and disk, but the content will be serialised.
 
-		positiveWords.persist(org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK)
-		positiveWords.collect
-    		negativeWords.persist(org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK_SER)
-		negativeWords.collect
+		val persistedPositives = positiveTweets.persist(org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK)
+		val persistedNegatives = negativeTweets.persist(org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK_SER)
+		persistedPositives.collect
+		persistedNegatives.collect
