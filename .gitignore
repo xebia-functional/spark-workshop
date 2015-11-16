@@ -3,3 +3,4 @@ derby.log
 target
 tmp
 .idea/
+spark-notebook*
