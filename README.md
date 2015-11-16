@@ -27,25 +27,45 @@ Some experience in Scala. Some familiarity with big data or parallel processing 
 ## How this repo is organized
 
 * [/data](./data): contains some files that will be used along the workshop as a sample data.
-* [/dist](./dist): binaries and config files that would be useful to setup the Spark cluster locally. We'll see how to use them in the next section.
-* [/labs](./labs): contains all the commands used along the workshop with some details.
+* [/notebooks](./notebooks): contains all the notebooks used along the workshop with some additional details.
 * [/sampleapp](./sampleapp): scala application used to package and submit to the Spark Cluster with _spark-submit_ command.
 * [/sbt](./sbt): sbt binaries, useful to work with the *sampleapp* scala application.
-* [/scripts](./scripts): contains the shell script to run the Spark Cluster locally, initially with a Spark Master and two Spark Worker nodes.
 
 ## Setup Locally
 
 * Install [Oracle Java 7/8](https://www.oracle.com/java/index.html) in case you haven't yet.
 * Clone this repository in your machine: `git clone https://github.com/47deg/spark-workshop.git`
-* Download Spark binary distribution. In this workshop we'll use [Spark 1.5.1 Pre-built for Hadoop 2.4](http://d3kbcqa49mib13.cloudfront.net/spark-1.5.1-bin-hadoop2.4.tgz).
-* Uncompress the file in your local machine and set up the **SPARK_HOME** environment variable, with the whole path. For instance:
-    `export SPARK_HOME=/path/to/spark-1.5.1-bin-hadoop2.4`
-* File [/dist/spark-env.sh](https://github.com/47deg/spark-workshop/raw/master/dist/spark-env.sh) must be copied to `$SPARK_HOME/conf/spark-env.sh`.
-* Let's run the Spark Cluster and the Spark Shell, from the root of your recently cloned repository, altogether into a single step:
-    `sh scripts/sparkws.sh`
-* That's all, if everything was fine you should be able to see the local Spark Standalone Deployment into your browser: [http://localhost:8080](http://localhost:8080) .
+* Download Spark Notebook binary distribution:
 
-![" "](./dist/standalone.png "Spark Standalone Deployment")
+```bash
+wget -O spark-notebook.tgz https://s3.eu-central-1.amazonaws.com/spark-notebook/tgz/spark-notebook-master-scala-2.10.4-spark-1.5.1-hadoop-2.2.0.tgz?max-keys=100000
+```
+* Decompress the downloaded file as `spark-notebook.tgz`:
+
+```bash
+tar -zxvf spark-notebook.tgz
+```
+
+* Rename the directory to make it more friendly:
+
+```bash
+mv spark-notebook-0.6.2-SNAPSHOT-scala-2.10.4-spark-1.5.1-hadoop-2.2.0 spark-notebook
+```
+
+* Create a directory where copy workshop notebooks:
+
+```bash
+mkdir spark-notebook/notebooks/workshop
+cp notebooks/* spark-notebook/notebooks/workshop
+```
+
+* Run the Spark Notebook:
+
+```bash
+cd spark-notebook && bin/spark-notebook
+```
+
+* That's all, if everything was fine you should be able to see the Spark Notebook UI on your browser: [http://localhost:9000/tree/workshop](http://localhost:9000/tree/workshop) .
 
 ## Acknowledgements
 
