@@ -1,0 +1,391 @@
+{
+  "metadata" : {
+    "name" : "Labs 4 - Spark Streaming",
+    "user_save_timestamp" : "1970-01-01T01:00:00.000Z",
+    "auto_save_timestamp" : "1970-01-01T01:00:00.000Z",
+    "language_info" : {
+      "name" : "scala",
+      "file_extension" : "scala",
+      "codemirror_mode" : "text/x-scala"
+    },
+    "trusted" : true,
+    "customLocalRepo" : null,
+    "customRepos" : null,
+    "customDeps" : null,
+    "customImports" : null,
+    "customArgs" : null,
+    "customSparkConf" : null
+  },
+  "cells" : [ {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "#Labs 4: Spark Streaming"
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "## Initial set up"
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "### Additional Dependencies"
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : ":local-repo /tmp/repo",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "res2: String = Repo changed to /tmp/repo!\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/plain" : "Repo changed to /tmp/repo!"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 1
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : ":dp org.apache.spark %% spark-streaming % 1.5.1\norg.apache.spark % spark-streaming-twitter_2.10 % 1.5.1\n- org.apache.spark %% spark-core % _\n- org.apache.hadoop % _ % _",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "warning: there were 4 feature warning(s); re-run with -feature for details\nglobalScope.jars: Array[String] = [Ljava.lang.String;@2d984361\nres5: List[String] = List(/tmp/repo/cache/org.apache.spark/spark-streaming-twitter_2.10/jars/spark-streaming-twitter_2.10-1.5.1.jar, /Users/juanpedromoreno/.m2/repository/org/twitter4j/twitter4j-stream/3.0.3/twitter4j-stream-3.0.3.jar, /Users/juanpedromoreno/.m2/repository/org/twitter4j/twitter4j-core/3.0.3/twitter4j-core-3.0.3.jar, /Users/juanpedromoreno/.m2/repository/org/spark-project/spark/unused/1.0.0/unused-1.0.0.jar)\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "<div class=\"container-fluid\"><div><div class=\"col-md-12\"><div>\n      <script data-this=\"{&quot;dataId&quot;:&quot;anon1d941f2623078be8a0f51b178df89e6e&quot;,&quot;dataInit&quot;:[{&quot;string value&quot;:&quot;/tmp/repo/cache/org.apache.spark/spark-streaming-twitter_2.10/jars/spark-streaming-twitter_2.10-1.5.1.jar&quot;},{&quot;string value&quot;:&quot;/Users/juanpedromoreno/.m2/repository/org/twitter4j/twitter4j-stream/3.0.3/twitter4j-stream-3.0.3.jar&quot;},{&quot;string value&quot;:&quot;/Users/juanpedromoreno/.m2/repository/org/twitter4j/twitter4j-core/3.0.3/twitter4j-core-3.0.3.jar&quot;},{&quot;string value&quot;:&quot;/Users/juanpedromoreno/.m2/repository/org/spark-project/spark/unused/1.0.0/unused-1.0.0.jar&quot;}],&quot;genId&quot;:&quot;1679346930&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(['../javascripts/notebook/playground','../javascripts/notebook/magic/tableChart'], \n      function(playground, _magictableChart) {\n        // data ==> data-this (in observable.js's scopedEval) ==> this in JS => { dataId, dataInit, ... }\n        // this ==> scope (in observable.js's scopedEval) ==> this.parentElement ==> div.container below (toHtml)\n\n        playground.call(data,\n                        this\n                        ,\n                        {\n    \"f\": _magictableChart,\n    \"o\": {\"headers\":[\"string value\"],\"width\":600,\"height\":400}\n  }\n  \n                        \n                        \n                      );\n      }\n    );/*]]>*/</script>\n    <div>\n        <label for=\"input-anon90224f673c1d1007ebad8dda308ac07e\">\n      Max Points\n    </label><input id=\"input-anon90224f673c1d1007ebad8dda308ac07e\" type=\"number\" name=\"input-anon90224f673c1d1007ebad8dda308ac07e\" data-bind=\"textInput: value, fireChange: true, valueUpdate: 'input'\">\n      <script data-selector=\"#input-anon90224f673c1d1007ebad8dda308ac07e\" data-this=\"{&quot;valueId&quot;:&quot;anon90224f673c1d1007ebad8dda308ac07e&quot;,&quot;valueInit&quot;:25}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(\n ['observable', 'knockout'],\n function (Observable, ko) {\n   //console.log(\"-----------\")\n   //console.dir(this);\n   //console.dir(valueId);\n   var obs = Observable.makeObservable(valueId)\n                       .extend({ rateLimit: { //throttle\n                                   timeout: 500,\n                                   method: \"notifyWhenChangesStop\"\n                                 }\n                               }\n                       );\n   ko.applyBindings({\n     value: obs\n   }, this);\n   obs(valueInit);\n }\n)/*]]>*/</script>\n    </input>\n        <p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anonfc837f6ad2c5d02d526ab6f8bfa2b37d&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p> <span style=\"color:red\"><p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anon722c0ad348c42120d1dbc76357258685&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p></span>\n        <div>\n        </div>\n      </div></div></div></div></div>"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 2
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "### Twitter Credentials "
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "Adapt the following environment variables and execute before launching Spark Notebook Server.\n```\n  export CONSUMER_KEY=<your-twitter-consumer-key>\n  export CONSUMER_SECRET=<your-twitter-consumer-secret>\n  export ACCESS_TOKEN=<your-twitter-access-token>\n  export ACCESS_TOKEN_SECRET=<your-twitter-access-token-secret>\n```"
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "def $(s:String) = sys.env(s)\nSystem.setProperty(\"twitter4j.oauth.consumerKey\", $(\"CONSUMER_KEY\"))\nSystem.setProperty(\"twitter4j.oauth.consumerSecret\", $(\"CONSUMER_SECRET\"))\nSystem.setProperty(\"twitter4j.oauth.accessToken\", $(\"ACCESS_TOKEN\"))\nSystem.setProperty(\"twitter4j.oauth.accessTokenSecret\", $(\"ACCESS_TOKEN_SECRET\"))\n\n\"The Twitter Credentials have been exported.\"",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "$: (s: String)String\nres6: String = The Twitter Credentials have been exported.\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "The Twitter Credentials have been exported."
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 3
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "## Spark Streaming"
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "### Create Spark Streaming Context"
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "import org.apache.spark.streaming.{Seconds, StreamingContext}\nimport org.apache.spark.SparkContext._\nimport StreamingContext._\nimport org.apache.spark.streaming.twitter._\nimport org.apache.spark.storage.StorageLevel\n\nval ssc = new StreamingContext(sparkContext = sparkContext, batchDuration = Seconds(2))",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "import org.apache.spark.streaming.{Seconds, StreamingContext}\nimport org.apache.spark.SparkContext._\nimport StreamingContext._\nimport org.apache.spark.streaming.twitter._\nimport org.apache.spark.storage.StorageLevel\nssc: org.apache.spark.streaming.StreamingContext = org.apache.spark.streaming.StreamingContext@1ecc113f\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "org.apache.spark.streaming.StreamingContext@1ecc113f"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 4
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "### Twitter Stream API"
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "More details in [Twitter Stream API Overview](https://dev.twitter.com/streaming/overview).\n\nThe tweets on the streaming are going to be filtered by the following **words**:"
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "val filters = Array(\n  \"scala\",\n  \"spark\",\n  \"akka\",\n  \"spray\",\n  \"play2\",\n  \"playframework\",  \n  \"java\",\n  \"python\",\n  \"cassandra\",\n  \"bigdata\",\n  \"47 Degrees\",\n  \"47Degrees\",\n  \"47Deg\",\n  \"functional\",\n  \"programming\",\n  \"lambda\",\n  \"chicharrones\",\n  \"music\")",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "filters: Array[String] = Array(scala, spark, akka, spray, play2, playframework, java, python, cassandra, bigdata, 47 Degrees, 47Degrees, 47Deg, functional, programming, lambda, chicharrones, music, cat, dog)\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "<div class=\"container-fluid\"><div><div class=\"col-md-12\"><div>\n      <script data-this=\"{&quot;dataId&quot;:&quot;anon4dc3450745beaceff5cb6e3fdafbc605&quot;,&quot;dataInit&quot;:[{&quot;string value&quot;:&quot;scala&quot;},{&quot;string value&quot;:&quot;spark&quot;},{&quot;string value&quot;:&quot;akka&quot;},{&quot;string value&quot;:&quot;spray&quot;},{&quot;string value&quot;:&quot;play2&quot;},{&quot;string value&quot;:&quot;playframework&quot;},{&quot;string value&quot;:&quot;java&quot;},{&quot;string value&quot;:&quot;python&quot;},{&quot;string value&quot;:&quot;cassandra&quot;},{&quot;string value&quot;:&quot;bigdata&quot;},{&quot;string value&quot;:&quot;47 Degrees&quot;},{&quot;string value&quot;:&quot;47Degrees&quot;},{&quot;string value&quot;:&quot;47Deg&quot;},{&quot;string value&quot;:&quot;functional&quot;},{&quot;string value&quot;:&quot;programming&quot;},{&quot;string value&quot;:&quot;lambda&quot;},{&quot;string value&quot;:&quot;chicharrones&quot;},{&quot;string value&quot;:&quot;music&quot;},{&quot;string value&quot;:&quot;cat&quot;},{&quot;string value&quot;:&quot;dog&quot;}],&quot;genId&quot;:&quot;1582803152&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(['../javascripts/notebook/playground','../javascripts/notebook/magic/tableChart'], \n      function(playground, _magictableChart) {\n        // data ==> data-this (in observable.js's scopedEval) ==> this in JS => { dataId, dataInit, ... }\n        // this ==> scope (in observable.js's scopedEval) ==> this.parentElement ==> div.container below (toHtml)\n\n        playground.call(data,\n                        this\n                        ,\n                        {\n    \"f\": _magictableChart,\n    \"o\": {\"headers\":[\"string value\"],\"width\":600,\"height\":400}\n  }\n  \n                        \n                        \n                      );\n      }\n    );/*]]>*/</script>\n    <div>\n        <label for=\"input-anon8aa2dcd0a3366899de5ec6850ef7bdab\">\n      Max Points\n    </label><input id=\"input-anon8aa2dcd0a3366899de5ec6850ef7bdab\" type=\"number\" name=\"input-anon8aa2dcd0a3366899de5ec6850ef7bdab\" data-bind=\"textInput: value, fireChange: true, valueUpdate: 'input'\">\n      <script data-selector=\"#input-anon8aa2dcd0a3366899de5ec6850ef7bdab\" data-this=\"{&quot;valueId&quot;:&quot;anon8aa2dcd0a3366899de5ec6850ef7bdab&quot;,&quot;valueInit&quot;:25}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(\n ['observable', 'knockout'],\n function (Observable, ko) {\n   //console.log(\"-----------\")\n   //console.dir(this);\n   //console.dir(valueId);\n   var obs = Observable.makeObservable(valueId)\n                       .extend({ rateLimit: { //throttle\n                                   timeout: 500,\n                                   method: \"notifyWhenChangesStop\"\n                                 }\n                               }\n                       );\n   ko.applyBindings({\n     value: obs\n   }, this);\n   obs(valueInit);\n }\n)/*]]>*/</script>\n    </input>\n        <p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anonbda8c0d3a9469bacb2131c1cebc184ee&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p> <span style=\"color:red\"><p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anonbc57eb45f446a627707e4b08fdf17bd7&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p></span>\n        <div>\n        </div>\n      </div></div></div></div></div>"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 5
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "#### Create the Twitter Listeners"
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "To create the `twitterStream` object we're going to use the `TwitterUtils` helper class, within the Spark Core. The method needs:\n* _Streaming Context_ Object.\n* _Twitter Credentials_ (optional). `Twitter4J` authentication, or `None` to use `Twitter4J's` default OAuth authorization; this uses the system properties `twitter4j.oauth.consumerKey`, `twitter4j.oauth.consumerSecret`, `twitter4j.oauth.accessToken` and `twitter4j.oauth.accessTokenSecret`. In our case, our choice was to provide these credentials through environment variables. \n* _Filters_: Set of filter strings to get only those tweets that match them. \n* _Storage Level_: Storage level to use for storing the received objects. In our case, `MEMORY_AND_DISK_SER`, that means we'll store the RDD as serialized Java objects (one byte array per partition). This is generally more space-efficient than deserialized objects, especially when using a fast serializer, but more CPU-intensive to read. Automagically, Spark will spill partitions that don't fit in memory to disk instead of recomputing them on the fly each time they're needed."
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "val twitterStream = TwitterUtils.createStream(\n  ssc = ssc, \n  twitterAuth = None, \n  filters = filters,\n  storageLevel = StorageLevel.MEMORY_AND_DISK_SER)",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "twitterStream: org.apache.spark.streaming.dstream.ReceiverInputDStream[twitter4j.Status] = org.apache.spark.streaming.twitter.TwitterInputDStream@69e64c0\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "org.apache.spark.streaming.twitter.TwitterInputDStream@69e64c0"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 6
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "### Spark Streaming Operations"
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "#### Filtering by HashTags"
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "val hashTags = twitterStream.flatMap(status => status.getText.split(\" \").filter(_.startsWith(\"#\")))",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "hashTags: org.apache.spark.streaming.dstream.DStream[String] = org.apache.spark.streaming.dstream.FlatMappedDStream@3fb79265\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "org.apache.spark.streaming.dstream.FlatMappedDStream@3fb79265"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 7
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "* Reduce last 30 seconds of data, every 10 seconds:"
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "val windowLength = Seconds(30)\nval slideInterval = Seconds(10)\n\nval windowedWordCounts = \n    hashTags\n      .map((_, 1))\n      .reduceByKeyAndWindow((a:Int,b:Int) => (a + b), windowLength, slideInterval)",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "windowLength: org.apache.spark.streaming.Duration = 30000 ms\nslideInterval: org.apache.spark.streaming.Duration = 10000 ms\nwindowedWordCounts: org.apache.spark.streaming.dstream.DStream[(String, Int)] = org.apache.spark.streaming.dstream.ShuffledDStream@23650136\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "org.apache.spark.streaming.dstream.ShuffledDStream@23650136"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 8
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "* Sort `windowedWordCounts` each 30 seconds, providing the trending topics for that time interval: "
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "val trendingTopics = \n    windowedWordCounts\n      .map { case (topic, count) => (count, topic) }\n      .transform(_.sortByKey(false))",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "trendingTopics: org.apache.spark.streaming.dstream.DStream[(Int, String)] = org.apache.spark.streaming.dstream.TransformedDStream@70b3b32b\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "org.apache.spark.streaming.dstream.TransformedDStream@70b3b32b"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 9
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "#### Showing Popular Hashtags"
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "output_stream_collapsed" : true,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "// Prints only the first 10 records\nval result = ul(10)",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "result: notebook.front.DataConnectedWidget[String]{implicit val singleCodec: notebook.Codec[play.api.libs.json.JsValue,String]; def data: Seq[String]; def data_=(x$1: Seq[String]): Unit; lazy val toHtml: scala.xml.Elem; def append(s: String): Unit; def appendAll(s: Seq[String]): Unit} = <anon$1 widget>\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "<ul data-bind=\"foreach: value\">\n      <li data-bind=\"text: $data\"></li><script data-this=\"{&quot;valueId&quot;:&quot;anon42895c530edfbb8d73db388be5034534&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n          /*]]>*/</script></ul>"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 10
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "trendingTopics\n  .foreachRDD { rdd =>\n    val topList = rdd.take(10).toList\n    val r = topList.map { case (count, hashTag) => s\"$hashTag: $count\" }\n    result(r)\n  }",
+    "outputs" : [ {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 11
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "#### Showing Geolocated Tweets"
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "val geo = widgets.GeoPointsChart(Seq((0d,0d, \"init\")))",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "geo: notebook.front.widgets.GeoPointsChart[Seq[(Double, Double, String)]] = <GeoPointsChart widget>\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "<div>\n      <script data-this=\"{&quot;dataId&quot;:&quot;anon4503b80ef5a325d54a07585b87d156d2&quot;,&quot;dataInit&quot;:[{&quot;_1&quot;:0.0,&quot;_2&quot;:0.0}],&quot;genId&quot;:&quot;568163121&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(['../javascripts/notebook/playground','../javascripts/notebook/magic/geoPointsChart'], \n      function(playground, _magicgeoPointsChart) {\n        // data ==> data-this (in observable.js's scopedEval) ==> this in JS => { dataId, dataInit, ... }\n        // this ==> scope (in observable.js's scopedEval) ==> this.parentElement ==> div.container below (toHtml)\n\n        playground.call(data,\n                        this\n                        ,\n                        {\n    \"f\": _magicgeoPointsChart,\n    \"o\": {\"lat\":\"_1\",\"lon\":\"_2\",\"width\":600,\"height\":400,\"rField\":null,\"colorField\":null}\n  }\n  \n                        \n                        \n                      );\n      }\n    );/*]]>*/</script>\n    <div>\n        <label for=\"input-anonebb7f76977c484c3725b5f579594e1c3\">\n      Max Points\n    </label><input id=\"input-anonebb7f76977c484c3725b5f579594e1c3\" type=\"number\" name=\"input-anonebb7f76977c484c3725b5f579594e1c3\" data-bind=\"textInput: value, fireChange: true, valueUpdate: 'input'\">\n      <script data-selector=\"#input-anonebb7f76977c484c3725b5f579594e1c3\" data-this=\"{&quot;valueId&quot;:&quot;anonebb7f76977c484c3725b5f579594e1c3&quot;,&quot;valueInit&quot;:25}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(\n ['observable', 'knockout'],\n function (Observable, ko) {\n   //console.log(\"-----------\")\n   //console.dir(this);\n   //console.dir(valueId);\n   var obs = Observable.makeObservable(valueId)\n                       .extend({ rateLimit: { //throttle\n                                   timeout: 500,\n                                   method: \"notifyWhenChangesStop\"\n                                 }\n                               }\n                       );\n   ko.applyBindings({\n     value: obs\n   }, this);\n   obs(valueInit);\n }\n)/*]]>*/</script>\n    </input>\n        <p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anon8328947d7a7a7b312072fada2982d8fc&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p> <span style=\"color:red\"><p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anonfe67169089bc2df0ad910c24fc3fbae6&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p></span>\n        <div>\n        </div>\n      </div></div>"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 12
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "output_stream_collapsed" : true,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "twitterStream\n  .window(windowLength, slideInterval)  \n  .filter { tweet => \n    !Option(tweet.getGeoLocation()).isEmpty && \n      !Option(tweet.getGeoLocation().getLatitude()).isEmpty && \n      !Option(tweet.getGeoLocation().getLongitude()).isEmpty\n  }\n  .map(s => (s.getGeoLocation().getLatitude(), s.getGeoLocation().getLongitude(), s.getText()))\n  .foreachRDD { rdd => \n    geo.applyOn(rdd.take(100))\n  }",
+    "outputs" : [ {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 13
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "Check the [Spark UI](http://localhost:4040/streaming)."
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "###  Start Streaming"
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "The streaming will be started at this point:"
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "ssc.start()",
+    "outputs" : [ {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 14
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "### Stop listening twitter "
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "// Initially commented to avoid stop the streaming after 'run all' the notebook.\nssc.stop()",
+    "outputs" : [ {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 16
+    } ]
+  } ],
+  "nbformat" : 4
+}
