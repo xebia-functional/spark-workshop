@@ -1,0 +1,430 @@
+{
+  "metadata" : {
+    "name" : "Labs 1 - Spark Basics",
+    "user_save_timestamp" : "2014-10-11T17:33:45.703Z",
+    "auto_save_timestamp" : "2015-01-10T00:02:12.659Z",
+    "language_info" : {
+      "name" : "scala",
+      "file_extension" : "scala",
+      "codemirror_mode" : "text/x-scala"
+    },
+    "trusted" : true,
+    "customLocalRepo" : null,
+    "customRepos" : null,
+    "customDeps" : null,
+    "customImports" : null,
+    "customArgs" : null,
+    "customSparkConf" : null
+  },
+  "cells" : [ {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "# Part 1: Basics"
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "We are going to go through 2 different sort of Spark operations:\n\n* **Transformations**. This kind of operations are lazy, which means that they are not going to\nrun anything in any node until an action is called. They don't return a value, but a pointer to\na new RDD.\nWe are going to tag them with a [T] at the beginning of the description to make it as clear as\npossible.\n\n* **Actions**. They apply an operation to a RDD and returns a value. When an action is called, all\n  the accumulated transformations are applied and the action is run over the last produced one.\n  We are going to tag them with a [A] at the beginning of the description to make it as clear as\n  possible.\n\nIn addition, we can follow our process execution, failures, times and some other metrics on the [Spark UI](http://localhost:4040/jobs)."
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "## Spark Conf and RDDs"
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "sparkContext.getConf.toDebugString",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "res2: String = \nspark.app.id=local-1447696474626\nspark.app.name=Labs 1 - Spark Basics\nspark.driver.host=192.168.1.17\nspark.driver.port=63077\nspark.executor.id=driver\nspark.externalBlockStore.folderName=spark-31e5d39f-dc32-4f12-bcc9-6a357b753b2b\nspark.fileserver.uri=http://192.168.1.17:63078\nspark.home=/Users/juanpedromoreno/workspace/util/spark-1.5.1-bin-hadoop2.4\nspark.jars=\nspark.master=local[*]\nspark.repl.class.uri=http://192.168.1.17:63075\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "spark.app.id=local-1447696474626\nspark.app.name=Labs 1 - Spark Basics\nspark.driver.host=192.168.1.17\nspark.driver.port=63077\nspark.executor.id=driver\nspark.externalBlockStore.folderName=spark-31e5d39f-dc32-4f12-bcc9-6a357b753b2b\nspark.fileserver.uri=http://192.168.1.17:63078\nspark.home=/Users/juanpedromoreno/workspace/util/spark-1.5.1-bin-hadoop2.4\nspark.jars=\nspark.master=local[*]\nspark.repl.class.uri=http://192.168.1.17:63075"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 1
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "val countRDD = sparkContext.makeRDD((1 to 1000).toArray)\n()",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "countRDD: org.apache.spark.rdd.RDD[Int] = ParallelCollectionRDD[0] at makeRDD at <console>:47\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 2
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "val count = countRDD.count()\n()",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "count: Long = 1000\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 3
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "_Hint_: We could use scala code within **{}** tags, together with html code, for instance."
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "<strong>{count * 2} items</strong>",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "res5: scala.xml.Elem = <strong>2000 items</strong>\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "<strong>2000 items</strong>"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 4
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "## Exercises"
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "* **[T]** Creates a RDD that will contain an Array[String] with the file lines text."
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "val textFile = sc.textFile(\"../data/README.md\")",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "textFile: org.apache.spark.rdd.RDD[String] = MapPartitionsRDD[2] at textFile at <console>:47\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "MapPartitionsRDD[2] at textFile at &lt;console&gt;:47"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 5
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "* **[A]** Applies count action to textFile RDD and returns the value."
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "textFile.count()",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "res6: Long = 98\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "98"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 6
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "* **[T]** Creates a new RDD with lines that contains the word `Spark`."
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "val linesWithSpark = textFile.filter(line => line.contains(\"Spark\"))",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "linesWithSpark: org.apache.spark.rdd.RDD[String] = MapPartitionsRDD[3] at filter at <console>:49\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "MapPartitionsRDD[3] at filter at &lt;console&gt;:49"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 6
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "* **[T]** Creates a new RDD containing the amount of words of each line."
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "val lineLenghts = textFile.map(line => line.split(\" \").size)",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "lineLenghts: org.apache.spark.rdd.RDD[Int] = MapPartitionsRDD[4] at map at <console>:49\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "MapPartitionsRDD[4] at map at &lt;console&gt;:49"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 8
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "* **[A]** Compares each lineLength and returns the highest value."
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "lineLenghts.reduce((a, b) => if (a > b) a else b)",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "res7: Int = 14\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "14"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 9
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "* **[A]** Makes the same action as before but using the Math java library."
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "import java.lang.Math\nlineLenghts.reduce((a, b) => Math.max(a,b))",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "import java.lang.Math\nres8: Int = 14\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "14"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 10
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "* **[A]** It performs an invalid operation that produces a runtime failure. The exception is initially wrapped into a lazy transformation operation. We only will see the issue running an action (collect in the example). We could see more details about this sort of errors in the [Spark UI](http://localhost:4040/jobs)."
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "val lazyFailure = lineLenghts.map(len => len + 3 / 0)\nlazyFailure.collect()",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "org.apache.spark.SparkException: Job aborted due to stage failure: Task 0 in stage 4.0 failed 1 times, most recent failure: Lost task 0.0 in stage 4.0 (TID 10, localhost): java.lang.ArithmeticException: / by zero\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$anonfun$1.apply$mcII$sp(<console>:52)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$anonfun$1.apply(<console>:52)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$anonfun$1.apply(<console>:52)\n\tat scala.collection.Iterator$$anon$11.next(Iterator.scala:328)\n\tat scala.collection.Iterator$class.foreach(Iterator.scala:727)\n\tat scala.collection.AbstractIterator.foreach(Iterator.scala:1157)\n\tat scala.collection.generic.Growable$class.$plus$plus$eq(Growable.scala:48)\n\tat scala.collection.mutable.ArrayBuffer.$plus$plus$eq(ArrayBuffer.scala:103)\n\tat scala.collection.mutable.ArrayBuffer.$plus$plus$eq(ArrayBuffer.scala:47)\n\tat scala.collection.TraversableOnce$class.to(TraversableOnce.scala:273)\n\tat scala.collection.AbstractIterator.to(Iterator.scala:1157)\n\tat scala.collection.TraversableOnce$class.toBuffer(TraversableOnce.scala:265)\n\tat scala.collection.AbstractIterator.toBuffer(Iterator.scala:1157)\n\tat scala.collection.TraversableOnce$class.toArray(TraversableOnce.scala:252)\n\tat scala.collection.AbstractIterator.toArray(Iterator.scala:1157)\n\tat org.apache.spark.rdd.RDD$$anonfun$collect$1$$anonfun$12.apply(RDD.scala:905)\n\tat org.apache.spark.rdd.RDD$$anonfun$collect$1$$anonfun$12.apply(RDD.scala:905)\n\tat org.apache.spark.SparkContext$$anonfun$runJob$5.apply(SparkContext.scala:1848)\n\tat org.apache.spark.SparkContext$$anonfun$runJob$5.apply(SparkContext.scala:1848)\n\tat org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:66)\n\tat org.apache.spark.scheduler.Task.run(Task.scala:88)\n\tat org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:214)\n\tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)\n\tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)\n\tat java.lang.Thread.run(Thread.java:745)\n\nDriver stacktrace:\n\tat org.apache.spark.scheduler.DAGScheduler.org$apache$spark$scheduler$DAGScheduler$$failJobAndIndependentStages(DAGScheduler.scala:1283)\n\tat org.apache.spark.scheduler.DAGScheduler$$anonfun$abortStage$1.apply(DAGScheduler.scala:1271)\n\tat org.apache.spark.scheduler.DAGScheduler$$anonfun$abortStage$1.apply(DAGScheduler.scala:1270)\n\tat scala.collection.mutable.ResizableArray$class.foreach(ResizableArray.scala:59)\n\tat scala.collection.mutable.ArrayBuffer.foreach(ArrayBuffer.scala:47)\n\tat org.apache.spark.scheduler.DAGScheduler.abortStage(DAGScheduler.scala:1270)\n\tat org.apache.spark.scheduler.DAGScheduler$$anonfun$handleTaskSetFailed$1.apply(DAGScheduler.scala:697)\n\tat org.apache.spark.scheduler.DAGScheduler$$anonfun$handleTaskSetFailed$1.apply(DAGScheduler.scala:697)\n\tat scala.Option.foreach(Option.scala:236)\n\tat org.apache.spark.scheduler.DAGScheduler.handleTaskSetFailed(DAGScheduler.scala:697)\n\tat org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.doOnReceive(DAGScheduler.scala:1496)\n\tat org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:1458)\n\tat org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:1447)\n\tat org.apache.spark.util.EventLoop$$anon$1.run(EventLoop.scala:48)\n\tat org.apache.spark.scheduler.DAGScheduler.runJob(DAGScheduler.scala:567)\n\tat org.apache.spark.SparkContext.runJob(SparkContext.scala:1822)\n\tat org.apache.spark.SparkContext.runJob(SparkContext.scala:1835)\n\tat org.apache.spark.SparkContext.runJob(SparkContext.scala:1848)\n\tat org.apache.spark.SparkContext.runJob(SparkContext.scala:1919)\n\tat org.apache.spark.rdd.RDD$$anonfun$collect$1.apply(RDD.scala:905)\n\tat org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:147)\n\tat org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:108)\n\tat org.apache.spark.rdd.RDD.withScope(RDD.scala:306)\n\tat org.apache.spark.rdd.RDD.collect(RDD.scala:904)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.<init>(<console>:55)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.<init>(<console>:61)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.<init>(<console>:63)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.<init>(<console>:65)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.<init>(<console>:67)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.<init>(<console>:69)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.<init>(<console>:71)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.<init>(<console>:73)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.<init>(<console>:75)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.<init>(<console>:77)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.<init>(<console>:79)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.<init>(<console>:81)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.<init>(<console>:83)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.<init>(<console>:85)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC.<init>(<console>:87)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC.<init>(<console>:89)\n\tat $iwC$$iwC$$iwC$$iwC.<init>(<console>:91)\n\tat $iwC$$iwC$$iwC.<init>(<console>:93)\n\tat $iwC$$iwC.<init>(<console>:95)\n\tat $iwC.<init>(<console>:97)\n\tat <init>(<console>:99)\n\tat .<init>(<console>:103)\n\tat .<clinit>(<console>)\n\tat .<init>(<console>:7)\n\tat .<clinit>(<console>)\n\tat $print(<console>)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:497)\n\tat org.apache.spark.repl.SparkIMain$ReadEvalPrint.call(SparkIMain.scala:1065)\n\tat org.apache.spark.repl.SparkIMain$Request.loadAndRun(SparkIMain.scala:1340)\n\tat org.apache.spark.repl.SparkIMain.loadAndRunReq$1(SparkIMain.scala:840)\n\tat org.apache.spark.repl.SparkIMain.interpret(SparkIMain.scala:871)\n\tat org.apache.spark.repl.SparkIMain.interpret(SparkIMain.scala:819)\n\tat notebook.kernel.Repl$$anonfun$3.apply(Repl.scala:173)\n\tat notebook.kernel.Repl$$anonfun$3.apply(Repl.scala:173)\n\tat scala.util.DynamicVariable.withValue(DynamicVariable.scala:57)\n\tat scala.Console$.withOut(Console.scala:126)\n\tat notebook.kernel.Repl.evaluate(Repl.scala:172)\n\tat notebook.client.ReplCalculator$$anonfun$10$$anon$1$$anonfun$24.apply(ReplCalculator.scala:362)\n\tat notebook.client.ReplCalculator$$anonfun$10$$anon$1$$anonfun$24.apply(ReplCalculator.scala:359)\n\tat scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24)\n\tat scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24)\n\tat akka.dispatch.TaskInvocation.run(AbstractDispatcher.scala:40)\n\tat akka.dispatch.ForkJoinExecutorConfigurator$AkkaForkJoinTask.exec(AbstractDispatcher.scala:397)\n\tat scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260)\n\tat scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339)\n\tat scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979)\n\tat scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107)\nCaused by: java.lang.ArithmeticException: / by zero\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$anonfun$1.apply$mcII$sp(<console>:52)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$anonfun$1.apply(<console>:52)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$anonfun$1.apply(<console>:52)\n\tat scala.collection.Iterator$$anon$11.next(Iterator.scala:328)\n\tat scala.collection.Iterator$class.foreach(Iterator.scala:727)\n\tat scala.collection.AbstractIterator.foreach(Iterator.scala:1157)\n\tat scala.collection.generic.Growable$class.$plus$plus$eq(Growable.scala:48)\n\tat scala.collection.mutable.ArrayBuffer.$plus$plus$eq(ArrayBuffer.scala:103)\n\tat scala.collection.mutable.ArrayBuffer.$plus$plus$eq(ArrayBuffer.scala:47)\n\tat scala.collection.TraversableOnce$class.to(TraversableOnce.scala:273)\n\tat scala.collection.AbstractIterator.to(Iterator.scala:1157)\n\tat scala.collection.TraversableOnce$class.toBuffer(TraversableOnce.scala:265)\n\tat scala.collection.AbstractIterator.toBuffer(Iterator.scala:1157)\n\tat scala.collection.TraversableOnce$class.toArray(TraversableOnce.scala:252)\n\tat scala.collection.AbstractIterator.toArray(Iterator.scala:1157)\n\tat org.apache.spark.rdd.RDD$$anonfun$collect$1$$anonfun$12.apply(RDD.scala:905)\n\tat org.apache.spark.rdd.RDD$$anonfun$collect$1$$anonfun$12.apply(RDD.scala:905)\n\tat org.apache.spark.SparkContext$$anonfun$runJob$5.apply(SparkContext.scala:1848)\n\tat org.apache.spark.SparkContext$$anonfun$runJob$5.apply(SparkContext.scala:1848)\n\tat org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:66)\n\tat org.apache.spark.scheduler.Task.run(Task.scala:88)\n\tat org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:214)\n\tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)\n\tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)\n\tat java.lang.Thread.run(Thread.java:745)\n\n"
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "* **[A]** It saves the `lineLengths` RDD as a text file, using string representations of elements."
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "import sys.process._\n\nif (new java.io.File(\"temp/lineLengths\").exists)\n  \"rm -rf temp/lineLengths\"!!\n\nlineLenghts.saveAsTextFile(\"temp/lineLengths\")",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "warning: there were 1 feature warning(s); re-run with -feature for details\nimport sys.process._\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 12
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "* **[T]** **Map-Reduce**. It will describe a new RDD that will contain the wordCount of each README line."
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "val wordCounts = textFile.flatMap(line => line.split(\" \")).map(word => (word, 1)).reduceByKey((a, b) => a + b)",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "wordCounts: org.apache.spark.rdd.RDD[(String, Int)] = ShuffledRDD[9] at reduceByKey at <console>:53\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "ShuffledRDD[9] at reduceByKey at &lt;console&gt;:53"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 13
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "* **[T]** It performs the same transformation than the previous one but in a simpler way."
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "val words = textFile.flatMap(_.split(\" \")).map((_, 1)).reduceByKey(_ + _)",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "words: org.apache.spark.rdd.RDD[(String, Int)] = ShuffledRDD[12] at reduceByKey at <console>:53\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "ShuffledRDD[12] at reduceByKey at &lt;console&gt;:53"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 14
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "* **[A]** We are going to collect the containing values on the wordCounts RDD. We'll see an Array[Int] with all the line wordCounts values."
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "wordCounts.collect",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "res11: Array[(String, Int)] = Array((package,1), (this,1), (Version\"](http://spark.apache.org/docs/latest/building-spark.html#specifying-the-hadoop-version),1), (Because,1), (Python,2), (cluster.,1), (its,1), ([run,1), (general,2), (have,1), (pre-built,1), (locally.,1), (locally,2), (changed,1), (sc.parallelize(1,1), (only,1), (several,1), (This,2), (basic,1), (Configuration,1), (learning,,1), (documentation,3), (YARN,,1), (graph,1), (Hive,2), (first,1), ([\"Specifying,1), (\"yarn\",1), (page](http://spark.apache.org/documentation.html),1), ([params]`.,1), (application,1), ([project,2), (prefer,1), (SparkPi,2), (<http://spark.apache.org/>,1), (engine,1), (version,1), (file,1), (documentation,,1), (MASTER,1), (example,3), (distribution.,1), (are,1), (params,1), (scala>,1), (DataFrames,,1), ..."
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "<div>\n      <script data-this=\"{&quot;dataId&quot;:&quot;anond3df2a485a01bcb125dc20c62333d1e4&quot;,&quot;dataInit&quot;:[{&quot;_1&quot;:&quot;package&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;this&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Version\\&quot;](http://spark.apache.org/docs/latest/building-spark.html#specifying-the-hadoop-version)&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Because&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Python&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;cluster.&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;its&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;[run&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;general&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;have&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;pre-built&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;locally.&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;locally&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;changed&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;sc.parallelize(1&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;only&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;several&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;This&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;basic&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Configuration&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;learning,&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;documentation&quot;,&quot;_2&quot;:3},{&quot;_1&quot;:&quot;YARN,&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;graph&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Hive&quot;,&quot;_2&quot;:2}],&quot;genId&quot;:&quot;627162147&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(['../javascripts/notebook/playground','../javascripts/notebook/magic/tabs'], \n      function(playground, _magictabs) {\n        // data ==> data-this (in observable.js's scopedEval) ==> this in JS => { dataId, dataInit, ... }\n        // this ==> scope (in observable.js's scopedEval) ==> this.parentElement ==> div.container below (toHtml)\n\n        playground.call(data,\n                        this\n                        ,\n                        {\n    \"f\": _magictabs,\n    \"o\": {}\n  }\n  \n                        \n                        \n                      );\n      }\n    );/*]]>*/</script>\n    <div>\n        <label for=\"input-anon6a0d5e139da144df10a11a888894c363\">\n      Max Points (controlling all tabs)\n    </label><input id=\"input-anon6a0d5e139da144df10a11a888894c363\" type=\"number\" name=\"input-anon6a0d5e139da144df10a11a888894c363\" data-bind=\"textInput: value, fireChange: true, valueUpdate: 'input'\">\n      <script data-selector=\"#input-anon6a0d5e139da144df10a11a888894c363\" data-this=\"{&quot;valueId&quot;:&quot;anon6a0d5e139da144df10a11a888894c363&quot;,&quot;valueInit&quot;:25}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(\n ['observable', 'knockout'],\n function (Observable, ko) {\n   //console.log(\"-----------\")\n   //console.dir(this);\n   //console.dir(valueId);\n   var obs = Observable.makeObservable(valueId)\n                       .extend({ rateLimit: { //throttle\n                                   timeout: 500,\n                                   method: \"notifyWhenChangesStop\"\n                                 }\n                               }\n                       );\n   ko.applyBindings({\n     value: obs\n   }, this);\n   obs(valueInit);\n }\n)/*]]>*/</script>\n    </input>\n        <div>\n          <ul class=\"nav nav-tabs\" id=\"ul627162147\"><li>\n                <a href=\"#tab627162147-0\"><i class=\"fa fa-table\"/></a>\n              </li><li>\n                <a href=\"#tab627162147-1\"><i class=\"fa fa-bar-chart\"/></a>\n              </li><li>\n                <a href=\"#tab627162147-2\"><i class=\"fa fa-pie-chart\"/></a>\n              </li></ul>\n\n          <div class=\"tab-content\" id=\"tab627162147\"><div class=\"tab-pane\" id=\"tab627162147-0\">\n              <div>\n      <script data-this=\"{&quot;dataId&quot;:&quot;anon19c2f3c95ff4a3570216131e1bd938f4&quot;,&quot;dataInit&quot;:[{&quot;_1&quot;:&quot;package&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;this&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Version\\&quot;](http://spark.apache.org/docs/latest/building-spark.html#specifying-the-hadoop-version)&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Because&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Python&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;cluster.&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;its&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;[run&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;general&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;have&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;pre-built&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;locally.&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;locally&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;changed&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;sc.parallelize(1&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;only&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;several&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;This&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;basic&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Configuration&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;learning,&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;documentation&quot;,&quot;_2&quot;:3},{&quot;_1&quot;:&quot;YARN,&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;graph&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Hive&quot;,&quot;_2&quot;:2}],&quot;genId&quot;:&quot;549490095&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(['../javascripts/notebook/playground','../javascripts/notebook/magic/tableChart'], \n      function(playground, _magictableChart) {\n        // data ==> data-this (in observable.js's scopedEval) ==> this in JS => { dataId, dataInit, ... }\n        // this ==> scope (in observable.js's scopedEval) ==> this.parentElement ==> div.container below (toHtml)\n\n        playground.call(data,\n                        this\n                        ,\n                        {\n    \"f\": _magictableChart,\n    \"o\": {\"headers\":[\"_1\",\"_2\"],\"width\":600,\"height\":400}\n  }\n  \n                        \n                        \n                      );\n      }\n    );/*]]>*/</script>\n    <div>\n        <label for=\"input-anon1309b7f9d9850fb837b360daeeae3209\">\n      Max Points\n    </label><input id=\"input-anon1309b7f9d9850fb837b360daeeae3209\" type=\"number\" name=\"input-anon1309b7f9d9850fb837b360daeeae3209\" data-bind=\"textInput: value, fireChange: true, valueUpdate: 'input'\">\n      <script data-selector=\"#input-anon1309b7f9d9850fb837b360daeeae3209\" data-this=\"{&quot;valueId&quot;:&quot;anon1309b7f9d9850fb837b360daeeae3209&quot;,&quot;valueInit&quot;:25}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(\n ['observable', 'knockout'],\n function (Observable, ko) {\n   //console.log(\"-----------\")\n   //console.dir(this);\n   //console.dir(valueId);\n   var obs = Observable.makeObservable(valueId)\n                       .extend({ rateLimit: { //throttle\n                                   timeout: 500,\n                                   method: \"notifyWhenChangesStop\"\n                                 }\n                               }\n                       );\n   ko.applyBindings({\n     value: obs\n   }, this);\n   obs(valueInit);\n }\n)/*]]>*/</script>\n    </input>\n        <p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anon39c6b8da52ba2bc3b4bb7378c13e5f63&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p> <span style=\"color:red\"><p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anon23a285526e6dc7d087e7c0b08eca8c45&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p></span>\n        <div>\n        </div>\n      </div></div>\n              </div><div class=\"tab-pane\" id=\"tab627162147-1\">\n              <div>\n      <script data-this=\"{&quot;dataId&quot;:&quot;anon3c25f94cd7cf65edb6dbe9a72172b3c0&quot;,&quot;dataInit&quot;:[{&quot;_1&quot;:&quot;package&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;this&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Version\\&quot;](http://spark.apache.org/docs/latest/building-spark.html#specifying-the-hadoop-version)&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Because&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Python&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;cluster.&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;its&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;[run&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;general&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;have&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;pre-built&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;locally.&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;locally&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;changed&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;sc.parallelize(1&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;only&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;several&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;This&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;basic&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Configuration&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;learning,&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;documentation&quot;,&quot;_2&quot;:3},{&quot;_1&quot;:&quot;YARN,&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;graph&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Hive&quot;,&quot;_2&quot;:2}],&quot;genId&quot;:&quot;1549789366&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(['../javascripts/notebook/playground','../javascripts/notebook/magic/barChart'], \n      function(playground, _magicbarChart) {\n        // data ==> data-this (in observable.js's scopedEval) ==> this in JS => { dataId, dataInit, ... }\n        // this ==> scope (in observable.js's scopedEval) ==> this.parentElement ==> div.container below (toHtml)\n\n        playground.call(data,\n                        this\n                        ,\n                        {\n    \"f\": _magicbarChart,\n    \"o\": {\"x\":\"_1\",\"y\":\"_2\",\"width\":600,\"height\":400}\n  }\n  \n                        \n                        \n                      );\n      }\n    );/*]]>*/</script>\n    <div>\n        <label for=\"input-anon2483fbb083486eceb221c1c436d88e09\">\n      Max Points\n    </label><input id=\"input-anon2483fbb083486eceb221c1c436d88e09\" type=\"number\" name=\"input-anon2483fbb083486eceb221c1c436d88e09\" data-bind=\"textInput: value, fireChange: true, valueUpdate: 'input'\">\n      <script data-selector=\"#input-anon2483fbb083486eceb221c1c436d88e09\" data-this=\"{&quot;valueId&quot;:&quot;anon2483fbb083486eceb221c1c436d88e09&quot;,&quot;valueInit&quot;:25}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(\n ['observable', 'knockout'],\n function (Observable, ko) {\n   //console.log(\"-----------\")\n   //console.dir(this);\n   //console.dir(valueId);\n   var obs = Observable.makeObservable(valueId)\n                       .extend({ rateLimit: { //throttle\n                                   timeout: 500,\n                                   method: \"notifyWhenChangesStop\"\n                                 }\n                               }\n                       );\n   ko.applyBindings({\n     value: obs\n   }, this);\n   obs(valueInit);\n }\n)/*]]>*/</script>\n    </input>\n        <p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anon088a5573328b0bb9057701c318d4ab9b&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p> <span style=\"color:red\"><p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anonfefbeb71c4592a7bc691fe3299c67270&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p></span>\n        <div>\n        </div>\n      </div></div>\n              </div><div class=\"tab-pane\" id=\"tab627162147-2\">\n              <div>\n      <script data-this=\"{&quot;dataId&quot;:&quot;anon6c22e47838a8f33dbe8d3cceaa53ecd1&quot;,&quot;dataInit&quot;:[{&quot;_1&quot;:&quot;package&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;this&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Version\\&quot;](http://spark.apache.org/docs/latest/building-spark.html#specifying-the-hadoop-version)&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Because&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Python&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;cluster.&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;its&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;[run&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;general&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;have&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;pre-built&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;locally.&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;locally&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;changed&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;sc.parallelize(1&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;only&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;several&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;This&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;basic&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Configuration&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;learning,&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;documentation&quot;,&quot;_2&quot;:3},{&quot;_1&quot;:&quot;YARN,&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;graph&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Hive&quot;,&quot;_2&quot;:2}],&quot;genId&quot;:&quot;1899996359&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(['../javascripts/notebook/playground','../javascripts/notebook/magic/pieChart'], \n      function(playground, _magicpieChart) {\n        // data ==> data-this (in observable.js's scopedEval) ==> this in JS => { dataId, dataInit, ... }\n        // this ==> scope (in observable.js's scopedEval) ==> this.parentElement ==> div.container below (toHtml)\n\n        playground.call(data,\n                        this\n                        ,\n                        {\n    \"f\": _magicpieChart,\n    \"o\": {\"series\":\"_1\",\"p\":\"_2\",\"width\":600,\"height\":400}\n  }\n  \n                        \n                        \n                      );\n      }\n    );/*]]>*/</script>\n    <div>\n        <label for=\"input-anonc85575ff058f3849087b7d202a0521af\">\n      Max Points\n    </label><input id=\"input-anonc85575ff058f3849087b7d202a0521af\" type=\"number\" name=\"input-anonc85575ff058f3849087b7d202a0521af\" data-bind=\"textInput: value, fireChange: true, valueUpdate: 'input'\">\n      <script data-selector=\"#input-anonc85575ff058f3849087b7d202a0521af\" data-this=\"{&quot;valueId&quot;:&quot;anonc85575ff058f3849087b7d202a0521af&quot;,&quot;valueInit&quot;:25}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(\n ['observable', 'knockout'],\n function (Observable, ko) {\n   //console.log(\"-----------\")\n   //console.dir(this);\n   //console.dir(valueId);\n   var obs = Observable.makeObservable(valueId)\n                       .extend({ rateLimit: { //throttle\n                                   timeout: 500,\n                                   method: \"notifyWhenChangesStop\"\n                                 }\n                               }\n                       );\n   ko.applyBindings({\n     value: obs\n   }, this);\n   obs(valueInit);\n }\n)/*]]>*/</script>\n    </input>\n        <p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anon77cafae261f50728a0c99ce720b89325&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p> <span style=\"color:red\"><p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anond50db0a0e95ba7515e047279e5a48825&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p></span>\n        <div>\n        </div>\n      </div></div>\n              </div></div>\n        </div>\n      </div></div>"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 15
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "* `cache` method, it persists the RDD with the default storage level (`MEMORY_ONLY`):"
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "val cachedRDD = wordCounts.cache()\ncachedRDD.collect()",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "cachedRDD: wordCounts.type = ShuffledRDD[9] at reduceByKey at <console>:53\nres12: Array[(String, Int)] = Array((package,1), (this,1), (Version\"](http://spark.apache.org/docs/latest/building-spark.html#specifying-the-hadoop-version),1), (Because,1), (Python,2), (cluster.,1), (its,1), ([run,1), (general,2), (have,1), (pre-built,1), (locally.,1), (locally,2), (changed,1), (sc.parallelize(1,1), (only,1), (several,1), (This,2), (basic,1), (Configuration,1), (learning,,1), (documentation,3), (YARN,,1), (graph,1), (Hive,2), (first,1), ([\"Specifying,1), (\"yarn\",1), (page](http://spark.apache.org/documentation.html),1), ([params]`.,1), (application,1), ([project,2), (prefer,1), (SparkPi,2), (<http://spark.apache.org/>,1), (engine,1), (version,1), (file,1), (documentation,,1), (MASTER,1), (exampl..."
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "<div>\n      <script data-this=\"{&quot;dataId&quot;:&quot;anon32aa6e444c682ecc97e01025decbedaa&quot;,&quot;dataInit&quot;:[{&quot;_1&quot;:&quot;package&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;this&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Version\\&quot;](http://spark.apache.org/docs/latest/building-spark.html#specifying-the-hadoop-version)&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Because&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Python&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;cluster.&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;its&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;[run&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;general&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;have&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;pre-built&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;locally.&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;locally&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;changed&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;sc.parallelize(1&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;only&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;several&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;This&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;basic&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Configuration&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;learning,&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;documentation&quot;,&quot;_2&quot;:3},{&quot;_1&quot;:&quot;YARN,&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;graph&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Hive&quot;,&quot;_2&quot;:2}],&quot;genId&quot;:&quot;89817968&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(['../javascripts/notebook/playground','../javascripts/notebook/magic/tabs'], \n      function(playground, _magictabs) {\n        // data ==> data-this (in observable.js's scopedEval) ==> this in JS => { dataId, dataInit, ... }\n        // this ==> scope (in observable.js's scopedEval) ==> this.parentElement ==> div.container below (toHtml)\n\n        playground.call(data,\n                        this\n                        ,\n                        {\n    \"f\": _magictabs,\n    \"o\": {}\n  }\n  \n                        \n                        \n                      );\n      }\n    );/*]]>*/</script>\n    <div>\n        <label for=\"input-anonb5e9dc66c340a4b1bf8c4e1b6696b880\">\n      Max Points (controlling all tabs)\n    </label><input id=\"input-anonb5e9dc66c340a4b1bf8c4e1b6696b880\" type=\"number\" name=\"input-anonb5e9dc66c340a4b1bf8c4e1b6696b880\" data-bind=\"textInput: value, fireChange: true, valueUpdate: 'input'\">\n      <script data-selector=\"#input-anonb5e9dc66c340a4b1bf8c4e1b6696b880\" data-this=\"{&quot;valueId&quot;:&quot;anonb5e9dc66c340a4b1bf8c4e1b6696b880&quot;,&quot;valueInit&quot;:25}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(\n ['observable', 'knockout'],\n function (Observable, ko) {\n   //console.log(\"-----------\")\n   //console.dir(this);\n   //console.dir(valueId);\n   var obs = Observable.makeObservable(valueId)\n                       .extend({ rateLimit: { //throttle\n                                   timeout: 500,\n                                   method: \"notifyWhenChangesStop\"\n                                 }\n                               }\n                       );\n   ko.applyBindings({\n     value: obs\n   }, this);\n   obs(valueInit);\n }\n)/*]]>*/</script>\n    </input>\n        <div>\n          <ul class=\"nav nav-tabs\" id=\"ul89817968\"><li>\n                <a href=\"#tab89817968-0\"><i class=\"fa fa-table\"/></a>\n              </li><li>\n                <a href=\"#tab89817968-1\"><i class=\"fa fa-bar-chart\"/></a>\n              </li><li>\n                <a href=\"#tab89817968-2\"><i class=\"fa fa-pie-chart\"/></a>\n              </li></ul>\n\n          <div class=\"tab-content\" id=\"tab89817968\"><div class=\"tab-pane\" id=\"tab89817968-0\">\n              <div>\n      <script data-this=\"{&quot;dataId&quot;:&quot;anonbfa2b5e4fd29d95b3962a8f91ae30f25&quot;,&quot;dataInit&quot;:[{&quot;_1&quot;:&quot;package&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;this&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Version\\&quot;](http://spark.apache.org/docs/latest/building-spark.html#specifying-the-hadoop-version)&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Because&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Python&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;cluster.&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;its&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;[run&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;general&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;have&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;pre-built&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;locally.&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;locally&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;changed&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;sc.parallelize(1&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;only&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;several&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;This&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;basic&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Configuration&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;learning,&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;documentation&quot;,&quot;_2&quot;:3},{&quot;_1&quot;:&quot;YARN,&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;graph&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Hive&quot;,&quot;_2&quot;:2}],&quot;genId&quot;:&quot;817596042&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(['../javascripts/notebook/playground','../javascripts/notebook/magic/tableChart'], \n      function(playground, _magictableChart) {\n        // data ==> data-this (in observable.js's scopedEval) ==> this in JS => { dataId, dataInit, ... }\n        // this ==> scope (in observable.js's scopedEval) ==> this.parentElement ==> div.container below (toHtml)\n\n        playground.call(data,\n                        this\n                        ,\n                        {\n    \"f\": _magictableChart,\n    \"o\": {\"headers\":[\"_1\",\"_2\"],\"width\":600,\"height\":400}\n  }\n  \n                        \n                        \n                      );\n      }\n    );/*]]>*/</script>\n    <div>\n        <label for=\"input-anona7f6f45af4baa7e7ac0b1b19216cb0de\">\n      Max Points\n    </label><input id=\"input-anona7f6f45af4baa7e7ac0b1b19216cb0de\" type=\"number\" name=\"input-anona7f6f45af4baa7e7ac0b1b19216cb0de\" data-bind=\"textInput: value, fireChange: true, valueUpdate: 'input'\">\n      <script data-selector=\"#input-anona7f6f45af4baa7e7ac0b1b19216cb0de\" data-this=\"{&quot;valueId&quot;:&quot;anona7f6f45af4baa7e7ac0b1b19216cb0de&quot;,&quot;valueInit&quot;:25}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(\n ['observable', 'knockout'],\n function (Observable, ko) {\n   //console.log(\"-----------\")\n   //console.dir(this);\n   //console.dir(valueId);\n   var obs = Observable.makeObservable(valueId)\n                       .extend({ rateLimit: { //throttle\n                                   timeout: 500,\n                                   method: \"notifyWhenChangesStop\"\n                                 }\n                               }\n                       );\n   ko.applyBindings({\n     value: obs\n   }, this);\n   obs(valueInit);\n }\n)/*]]>*/</script>\n    </input>\n        <p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anon2db238605d81bd905c0421d9e58a6d4b&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p> <span style=\"color:red\"><p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anon8989e51e7ee5af087ffd763995d74c36&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p></span>\n        <div>\n        </div>\n      </div></div>\n              </div><div class=\"tab-pane\" id=\"tab89817968-1\">\n              <div>\n      <script data-this=\"{&quot;dataId&quot;:&quot;anonb1e5b2e73dbf610f3213a39b10549d67&quot;,&quot;dataInit&quot;:[{&quot;_1&quot;:&quot;package&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;this&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Version\\&quot;](http://spark.apache.org/docs/latest/building-spark.html#specifying-the-hadoop-version)&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Because&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Python&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;cluster.&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;its&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;[run&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;general&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;have&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;pre-built&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;locally.&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;locally&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;changed&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;sc.parallelize(1&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;only&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;several&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;This&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;basic&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Configuration&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;learning,&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;documentation&quot;,&quot;_2&quot;:3},{&quot;_1&quot;:&quot;YARN,&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;graph&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Hive&quot;,&quot;_2&quot;:2}],&quot;genId&quot;:&quot;1360556761&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(['../javascripts/notebook/playground','../javascripts/notebook/magic/barChart'], \n      function(playground, _magicbarChart) {\n        // data ==> data-this (in observable.js's scopedEval) ==> this in JS => { dataId, dataInit, ... }\n        // this ==> scope (in observable.js's scopedEval) ==> this.parentElement ==> div.container below (toHtml)\n\n        playground.call(data,\n                        this\n                        ,\n                        {\n    \"f\": _magicbarChart,\n    \"o\": {\"x\":\"_1\",\"y\":\"_2\",\"width\":600,\"height\":400}\n  }\n  \n                        \n                        \n                      );\n      }\n    );/*]]>*/</script>\n    <div>\n        <label for=\"input-anon19f2a316791a87244fda7209afffac28\">\n      Max Points\n    </label><input id=\"input-anon19f2a316791a87244fda7209afffac28\" type=\"number\" name=\"input-anon19f2a316791a87244fda7209afffac28\" data-bind=\"textInput: value, fireChange: true, valueUpdate: 'input'\">\n      <script data-selector=\"#input-anon19f2a316791a87244fda7209afffac28\" data-this=\"{&quot;valueId&quot;:&quot;anon19f2a316791a87244fda7209afffac28&quot;,&quot;valueInit&quot;:25}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(\n ['observable', 'knockout'],\n function (Observable, ko) {\n   //console.log(\"-----------\")\n   //console.dir(this);\n   //console.dir(valueId);\n   var obs = Observable.makeObservable(valueId)\n                       .extend({ rateLimit: { //throttle\n                                   timeout: 500,\n                                   method: \"notifyWhenChangesStop\"\n                                 }\n                               }\n                       );\n   ko.applyBindings({\n     value: obs\n   }, this);\n   obs(valueInit);\n }\n)/*]]>*/</script>\n    </input>\n        <p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anon9e0e2ddea4e315524e825b58f27679cb&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p> <span style=\"color:red\"><p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anon677fcdce17f9fd22520d736ef83e2e84&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p></span>\n        <div>\n        </div>\n      </div></div>\n              </div><div class=\"tab-pane\" id=\"tab89817968-2\">\n              <div>\n      <script data-this=\"{&quot;dataId&quot;:&quot;anon28003d21992357e54806be5fced313a9&quot;,&quot;dataInit&quot;:[{&quot;_1&quot;:&quot;package&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;this&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Version\\&quot;](http://spark.apache.org/docs/latest/building-spark.html#specifying-the-hadoop-version)&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Because&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Python&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;cluster.&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;its&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;[run&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;general&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;have&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;pre-built&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;locally.&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;locally&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;changed&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;sc.parallelize(1&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;only&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;several&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;This&quot;,&quot;_2&quot;:2},{&quot;_1&quot;:&quot;basic&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Configuration&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;learning,&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;documentation&quot;,&quot;_2&quot;:3},{&quot;_1&quot;:&quot;YARN,&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;graph&quot;,&quot;_2&quot;:1},{&quot;_1&quot;:&quot;Hive&quot;,&quot;_2&quot;:2}],&quot;genId&quot;:&quot;2014413941&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(['../javascripts/notebook/playground','../javascripts/notebook/magic/pieChart'], \n      function(playground, _magicpieChart) {\n        // data ==> data-this (in observable.js's scopedEval) ==> this in JS => { dataId, dataInit, ... }\n        // this ==> scope (in observable.js's scopedEval) ==> this.parentElement ==> div.container below (toHtml)\n\n        playground.call(data,\n                        this\n                        ,\n                        {\n    \"f\": _magicpieChart,\n    \"o\": {\"series\":\"_1\",\"p\":\"_2\",\"width\":600,\"height\":400}\n  }\n  \n                        \n                        \n                      );\n      }\n    );/*]]>*/</script>\n    <div>\n        <label for=\"input-anon74d05417a5d260b9eebab8a15433b4fe\">\n      Max Points\n    </label><input id=\"input-anon74d05417a5d260b9eebab8a15433b4fe\" type=\"number\" name=\"input-anon74d05417a5d260b9eebab8a15433b4fe\" data-bind=\"textInput: value, fireChange: true, valueUpdate: 'input'\">\n      <script data-selector=\"#input-anon74d05417a5d260b9eebab8a15433b4fe\" data-this=\"{&quot;valueId&quot;:&quot;anon74d05417a5d260b9eebab8a15433b4fe&quot;,&quot;valueInit&quot;:25}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(\n ['observable', 'knockout'],\n function (Observable, ko) {\n   //console.log(\"-----------\")\n   //console.dir(this);\n   //console.dir(valueId);\n   var obs = Observable.makeObservable(valueId)\n                       .extend({ rateLimit: { //throttle\n                                   timeout: 500,\n                                   method: \"notifyWhenChangesStop\"\n                                 }\n                               }\n                       );\n   ko.applyBindings({\n     value: obs\n   }, this);\n   obs(valueInit);\n }\n)/*]]>*/</script>\n    </input>\n        <p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anon0eb6f1cc8c8ef17ee0888dc36759861d&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p> <span style=\"color:red\"><p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anon2536efcfe19cebfbde7956e71f7eecbd&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p></span>\n        <div>\n        </div>\n      </div></div>\n              </div></div>\n        </div>\n      </div></div>"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 16
+    } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "Once the wordCounts RDD is cached, it won't be re-computed (have a look to the [Spark UI](http://localhost:4040/jobs) to see more details)."
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "* Utility to show more information about one RDD DAG:"
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "cachedRDD.toDebugString",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "res13: String = \n(2) ShuffledRDD[9] at reduceByKey at <console>:53 [Memory Deserialized 1x Replicated]\n |       CachedPartitions: 2; MemorySize: 23.6 KB; ExternalBlockStoreSize: 0.0 B; DiskSize: 0.0 B\n +-(2) MapPartitionsRDD[8] at map at <console>:53 [Memory Deserialized 1x Replicated]\n    |  MapPartitionsRDD[7] at flatMap at <console>:53 [Memory Deserialized 1x Replicated]\n    |  MapPartitionsRDD[2] at textFile at <console>:47 [Memory Deserialized 1x Replicated]\n    |  ../data/README.md HadoopRDD[1] at textFile at <console>:47 [Memory Deserialized 1x Replicated]\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "(2) ShuffledRDD[9] at reduceByKey at &lt;console&gt;:53 [Memory Deserialized 1x Replicated]\n |       CachedPartitions: 2; MemorySize: 23.6 KB; ExternalBlockStoreSize: 0.0 B; DiskSize: 0.0 B\n +-(2) MapPartitionsRDD[8] at map at &lt;console&gt;:53 [Memory Deserialized 1x Replicated]\n    |  MapPartitionsRDD[7] at flatMap at &lt;console&gt;:53 [Memory Deserialized 1x Replicated]\n    |  MapPartitionsRDD[2] at textFile at &lt;console&gt;:47 [Memory Deserialized 1x Replicated]\n    |  ../data/README.md HadoopRDD[1] at textFile at &lt;console&gt;:47 [Memory Deserialized 1x Replicated]"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 17
+    } ]
+  } ],
+  "nbformat" : 4
+}
