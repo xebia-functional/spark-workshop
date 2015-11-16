@@ -1,7 +1,5 @@
 # Spark Workshop
 
-This repository was delivered at [Lambda World 2015](http://www.lambda.world/) on October 23th, 2015, celebrated in Cádiz, as part of one the Workshops of Introduction to [Apache Spark](http://spark.apache.org/).
-
 ## Overview
 
 >Apache Spark is a fast and general-purpose cluster computing system. It provides high-level APIs in Java, Scala, Python and R, and an optimized engine that supports general execution graphs. It also supports a rich set of higher-level tools including Spark SQL for SQL and structured data processing, MLlib for machine learning, GraphX for graph processing, and Spark Streaming.
@@ -23,6 +21,7 @@ Some experience in Scala. Some familiarity with big data or parallel processing 
 * Overview Spark SQL and DataFrames
 	* Labs Session
 * Overview Spark Streaming
+  * Labs Session
 * Spark Architecture and Cluster Deployment
 
 ## How this repo is organized
@@ -47,6 +46,10 @@ Some experience in Scala. Some familiarity with big data or parallel processing 
 * That's all, if everything was fine you should be able to see the local Spark Standalone Deployment into your browser: [http://localhost:8080](http://localhost:8080) .
 
 ![" "](./dist/standalone.png "Spark Standalone Deployment")
+
+## Acknowledgements
+
+Special thanks to @andypetrella for the excellent work done on the [spark-notebook](https://github.com/andypetrella/spark-notebook) project.
 
 ## About Tweets Sentimental Analysis
 
