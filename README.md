@@ -52,7 +52,7 @@ tar -zxvf spark-notebook.tgz
 mv spark-notebook-0.6.2-SNAPSHOT-scala-2.10.4-spark-1.5.1-hadoop-2.2.0 spark-notebook
 ```
 
-* Create a directory where copy workshop notebooks:
+* Create a directory where to copy the workshop notebooks:
 
 ```bash
 mkdir spark-notebook/notebooks/workshop
