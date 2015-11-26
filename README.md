@@ -34,7 +34,12 @@ Some experience in Scala. Some familiarity with big data or parallel processing 
 ## Setup Locally
 
 * Install [Oracle Java 7/8](https://www.oracle.com/java/index.html) in case you haven't yet.
-* Clone this repository in your machine: `git clone https://github.com/47deg/spark-workshop.git`
+* Clone this repository in your machine:
+
+```bash
+git clone https://github.com/47deg/spark-workshop.git && cd spark-workshop
+```
+
 * Download Spark Notebook binary distribution:
 
 ```bash
@@ -55,7 +60,7 @@ mv spark-notebook-0.6.2-SNAPSHOT-scala-2.10.4-spark-1.5.1-hadoop-2.2.0 spark-not
 * Create a directory where to copy the workshop notebooks:
 
 ```bash
-mkdir spark-notebook/notebooks/workshop
+mkdir -p spark-notebook/notebooks/workshop
 cp notebooks/* spark-notebook/notebooks/workshop
 ```
 
