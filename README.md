@@ -43,7 +43,7 @@ git clone https://github.com/47deg/spark-workshop.git && cd spark-workshop
 * Download Spark Notebook binary distribution:
 
 ```bash
-wget -O spark-notebook.zip https://s3.eu-central-1.amazonaws.com/spark-notebook/zip/spark-notebook-master-scala-2.10.4-spark-1.5.1-hadoop-2.2.0.zip?max-keys=100000
+wget -O spark-notebook.zip https://s3.eu-central-1.amazonaws.com/spark-notebook/zip/spark-notebook-0.6.3-scala-2.10.4-spark-1.5.1-hadoop-2.2.0.zip?max-keys=100000
 ```
 * Decompress the downloaded file as `spark-notebook.zip`:
 
